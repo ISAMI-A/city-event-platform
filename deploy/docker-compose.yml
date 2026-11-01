@@ -1,0 +1,147 @@
+name: city-platform
+
+# 开发环境基础设施编排。业务服务镜像在 P5 阶段补充。
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: city-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?MYSQL_ROOT_PASSWORD is required}
+      TZ: Asia/Shanghai
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_general_ci
+      - --default-time-zone=+08:00
+      - --lower-case-table-names=1
+    ports:
+      # 宿主机端口可配置，避免与本机已运行的 MySQL 冲突
+      - "${MYSQL_HOST_PORT:-3306}:3306"
+    volumes:
+      - city-mysql-data:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+    networks:
+      - city-net
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: city-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - city-redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    networks:
+      - city-net
+
+  nacos:
+    # 若 v2.4.3 镜像不可用，改用 nacos/nacos-server:v2.4.2（客户端为 2.4.2）
+    image: nacos/nacos-server:v2.4.3
+    container_name: city-nacos
+    restart: unless-stopped
+    environment:
+      MODE: standalone
+      NACOS_AUTH_ENABLE: "false"
+      JVM_XMS: 256m
+      JVM_XMX: 512m
+      JVM_XMN: 128m
+      TZ: Asia/Shanghai
+    ports:
+      # 8848 HTTP，9848/9849 为 Nacos 2.x gRPC 端口，必须一并映射
+      - "${NACOS_HTTP_PORT:-8848}:8848"
+      - "${NACOS_GRPC_PORT:-9848}:9848"
+      - "${NACOS_GRPC_PORT_OFFSET:-9849}:9849"
+    volumes:
+      - city-nacos-data:/home/nacos/data
+      - city-nacos-logs:/home/nacos/logs
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8848/nacos/v1/console/health/readiness || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+    networks:
+      - city-net
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: city-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
+      TZ: Asia/Shanghai
+    ports:
+      - "${RABBITMQ_PORT:-5672}:5672"
+      - "${RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
+    volumes:
+      - city-rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    networks:
+      - city-net
+
+  seata:
+    image: apache/seata-server:2.1.0
+    container_name: city-seata
+    restart: unless-stopped
+    environment:
+      # 注册到 Nacos 的地址：业务服务运行在宿主机，使用 127.0.0.1 + 端口映射访问
+      SEATA_IP: ${SEATA_IP:-127.0.0.1}
+      SEATA_PORT: 8091
+      STORE_MODE: file
+      TZ: Asia/Shanghai
+      NACOS_SERVER_ADDR: nacos:8848
+    ports:
+      - "${SEATA_CONSOLE_PORT:-7091}:7091"
+      - "${SEATA_PORT:-8091}:8091"
+    volumes:
+      - ./seata/application.yml:/seata-server/resources/application.yml:ro
+      - city-seata-data:/seata-server/sessionStore
+    depends_on:
+      nacos:
+        condition: service_healthy
+    networks:
+      - city-net
+
+  admin-web:
+    image: nginx:1.27-alpine
+    container_name: city-admin-web
+    restart: unless-stopped
+    ports:
+      - "${ADMIN_WEB_PORT:-8092}:80"
+    volumes:
+      - ../admin-web:/usr/share/nginx/html:ro
+      - ./nginx/admin-web.conf:/etc/nginx/conf.d/default.conf:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - city-net
+
+volumes:
+  city-mysql-data:
+  city-redis-data:
+  city-nacos-data:
+  city-nacos-logs:
+  city-rabbitmq-data:
+  city-seata-data:
+
+networks:
+  city-net:
+    driver: bridge

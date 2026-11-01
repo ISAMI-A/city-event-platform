@@ -1,0 +1,48 @@
+<view class="page">
+  <view class="row" style="margin-bottom:20rpx;">
+    <view class="title" style="margin:0;">我的事件</view>
+    <button class="btn btn-secondary" style="width:180rpx;margin:0;padding:10rpx 0;font-size:26rpx;" bindtap="goReport">上报</button>
+  </view>
+
+  <!-- 招募公告轮播：点击进入岗位详情报名 -->
+  <swiper class="recruit-swiper" wx:if="{{recruitments.length}}" indicator-dots="{{true}}" autoplay="{{true}}"
+          circular="{{true}}" interval="4000" duration="500" indicator-color="rgba(255,255,255,0.45)"
+          indicator-active-color="#ffffff">
+    <swiper-item wx:for="{{recruitments}}" wx:key="id" data-id="{{item.id}}" bindtap="goRecruitment">
+      <view class="recruit-card">
+        <image wx:if="{{item.cover}}" class="recruit-bg" src="{{item.cover}}" mode="aspectFill"></image>
+        <view class="recruit-mask"></view>
+        <view class="recruit-content">
+          <view class="recruit-badge">公开招聘</view>
+          <view class="recruit-title">{{item.title}}</view>
+          <view class="recruit-sub">{{item.deptName || '城市管理'}}{{item.workZone ? '｜' + item.workZone : ''}}｜招 {{item.headcount || 1}} 人</view>
+          <view class="recruit-btn">查看详情并报名</view>
+        </view>
+      </view>
+    </swiper-item>
+  </swiper>
+
+  <scroll-view class="filter-bar" scroll-x="true">
+    <view
+      class="filter-item {{filterKey === item.key ? 'active' : ''}}"
+      wx:for="{{filters}}"
+      wx:key="key"
+      data-key="{{item.key}}"
+      bindtap="onFilter"
+    >{{item.name}}</view>
+  </scroll-view>
+
+  <view class="error" wx:if="{{error}}">{{error}}</view>
+  <view class="empty" wx:if="{{loading}}">加载中…</view>
+  <view class="empty" wx:elif="{{viewList.length === 0}}">暂无事件，点击右上角上报</view>
+
+  <view class="card" wx:for="{{viewList}}" wx:key="id" data-id="{{item.id}}" bindtap="goDetail">
+    <view class="row">
+      <view class="title" style="font-size:28rpx;margin:0;">{{item.title}}</view>
+      <view class="tag {{item.statusClass}}">{{item.statusText}}</view>
+    </view>
+    <view class="timeline-text" style="margin-top:10rpx;">{{item.eventNo}}｜{{item.address}}</view>
+    <view class="label" style="margin-top:8rpx;">{{item.createTime}}</view>
+    <view class="error" wx:if="{{item.rejectReason}}">驳回原因：{{item.rejectReason}}</view>
+  </view>
+</view>

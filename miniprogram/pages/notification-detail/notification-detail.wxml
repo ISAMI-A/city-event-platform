@@ -1,0 +1,18 @@
+<view class="page" wx:if="{{item}}">
+  <view class="card detail">
+    <view class="row">
+      <view class="tag tag-blue">{{typeText}}</view>
+      <view class="label">{{timeText}}</view>
+    </view>
+    <view class="notice-title">{{item.title}}</view>
+    <view class="divider"></view>
+    <text class="notice-body" user-select="true">{{bodyText}}</text>
+    <view class="receipt" wx:if="{{receiptText}}">{{receiptText}}</view>
+  </view>
+
+  <view class="actions">
+    <button class="btn btn-secondary" style="margin:0;" bindtap="copyContent">复制内容</button>
+    <button class="btn" wx:if="{{canForward}}" style="margin:0;" bindtap="onForward">通知组员</button>
+  </view>
+</view>
+<view class="empty" wx:else>加载中…</view>

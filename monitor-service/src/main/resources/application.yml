@@ -1,0 +1,33 @@
+server:
+  port: 8090
+
+spring:
+  application:
+    name: monitor-service
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  cloud:
+    nacos:
+      server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
+      discovery:
+        enabled: ${NACOS_DISCOVERY_ENABLED:true}
+        group: CITY_PLATFORM
+        namespace: ${NACOS_NAMESPACE:public}
+  security:
+    user:
+      name: ${SBA_USER:admin}
+      password: ${SBA_PASSWORD:Admin@123}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.city.platform: info
+    de.codecentric: info

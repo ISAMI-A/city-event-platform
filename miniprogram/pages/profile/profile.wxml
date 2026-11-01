@@ -1,0 +1,99 @@
+<view class="page">
+  <view class="empty" wx:if="{{loading && !me}}">加载中…</view>
+  <view class="error" wx:if="{{error}}">{{error}}</view>
+
+  <block wx:if="{{me}}">
+    <!-- 头部：头像 + 基本信息 + 编辑入口 -->
+    <view class="card">
+      <view class="row">
+        <view class="avatar-wrap">
+          <image wx:if="{{avatarPreview}}" class="avatar" src="{{avatarPreview}}" mode="aspectFill"></image>
+          <view wx:else class="avatar avatar-placeholder">{{avatarText}}</view>
+        </view>
+        <view class="profile-info">
+          <view class="profile-name">{{me.nickname || '未设置昵称'}}</view>
+          <view class="label">账号：{{me.username || '-'}}</view>
+          <view class="tag">{{roleText}}</view>
+        </view>
+        <view class="edit-entry" bindtap="editProfile">编辑</view>
+      </view>
+    </view>
+
+    <!-- 未设置密码时的安全引导 -->
+    <view class="card warn-card" wx:if="{{wxBound && !hasPassword}}" bindtap="editProfile">
+      <view class="warn-title">完善账号安全</view>
+      <view class="muted-tip">当前使用微信快捷登录，建议设置登录密码并绑定手机号，避免解绑微信后无法登录本账号。</view>
+      <view class="warn-link">去设置 ›</view>
+    </view>
+
+    <!-- 账号信息：只读 -->
+    <view class="card">
+      <view class="title small">账号信息</view>
+      <view class="info-row">
+        <text class="info-key">昵称</text>
+        <text class="info-value">{{me.nickname || '未设置'}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-key">登录账号</text>
+        <text class="info-value">{{me.username || '-'}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-key">手机号</text>
+        <text class="info-value">{{phone || '未绑定'}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-key">邮箱</text>
+        <text class="info-value">{{email ? email + (emailVerified ? '（已验证）' : '（未验证）') : '未绑定'}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-key">登录密码</text>
+        <text class="info-value">{{hasPassword ? '已设置' : '未设置'}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-key">微信绑定</text>
+        <text class="info-value">{{wxBound ? '已绑定' : '未绑定'}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-key">当前角色</text>
+        <text class="info-value">{{roleText}}</text>
+      </view>
+      <view class="muted-tip">登录账号由系统自动生成且不可修改；点右上角“编辑”可修改资料与账号安全信息</view>
+    </view>
+
+    <!-- 处理人员档案 -->
+    <view class="card" wx:if="{{worker}}">
+      <view class="title small">处理人员档案</view>
+      <view class="info-row">
+        <text class="info-key">人员类型</text>
+        <text class="info-value">{{worker.typeText}}</text>
+      </view>
+      <view class="info-row" wx:if="{{worker.typeText === '组员'}}">
+        <text class="info-key">所属组长</text>
+        <text class="info-value">{{worker.leaderName}}</text>
+      </view>
+      <view class="info-row" wx:if="{{worker.typeText === '组长'}}">
+        <text class="info-key">组员人数</text>
+        <text class="info-value">{{worker.teamSize}} 人</text>
+      </view>
+      <view class="info-row">
+        <text class="info-key">部门</text>
+        <text class="info-value">{{worker.deptName}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-key">负责片区</text>
+        <text class="info-value">{{worker.workZone}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-key">在岗状态</text>
+        <text class="info-value">{{worker.dutyText}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-key">账号状态</text>
+        <text class="info-value">{{worker.accountText}}</text>
+      </view>
+      <view class="muted-tip">人员类型、所属组长、片区、在岗状态由管理员维护</view>
+    </view>
+
+    <button class="btn btn-secondary logout-btn" bindtap="logout">退出登录</button>
+  </block>
+</view>

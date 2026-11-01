@@ -1,0 +1,2 @@
+com.city.platform.common.core.config.CoreWebAutoConfiguration
+com.city.platform.common.core.config.MybatisPlusAutoConfiguration

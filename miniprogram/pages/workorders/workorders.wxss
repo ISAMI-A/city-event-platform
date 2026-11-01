@@ -1,0 +1,111 @@
+.page {
+  padding-bottom: calc(140rpx + env(safe-area-inset-bottom));
+}
+
+.filter-bar {
+  white-space: nowrap;
+  margin-bottom: 20rpx;
+}
+
+.filter-item {
+  display: inline-block;
+  padding: 10rpx 26rpx;
+  margin-right: 14rpx;
+  border-radius: 999rpx;
+  font-size: 26rpx;
+  color: #6b7280;
+  background: #ffffff;
+  border: 1rpx solid #e5e7eb;
+}
+
+.filter-item.active {
+  color: #1f6feb;
+  background: #eef4ff;
+  border-color: #1f6feb;
+  font-weight: 600;
+}
+
+.head-actions {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.bell {
+  position: relative;
+  width: 76rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  border-radius: 16rpx;
+  border: 1rpx solid #e5e7eb;
+}
+
+.bell-icon {
+  width: 40rpx;
+  height: 40rpx;
+}
+
+.bell-badge {
+  position: absolute;
+  top: -10rpx;
+  right: -10rpx;
+  min-width: 32rpx;
+  height: 32rpx;
+  padding: 0 8rpx;
+  border-radius: 16rpx;
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 20rpx;
+  line-height: 32rpx;
+  text-align: center;
+}
+
+.todo-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 28rpx;
+  margin-bottom: 20rpx;
+  border-radius: 20rpx;
+  background: linear-gradient(135deg, #1f6feb, #4f9bff);
+  color: #ffffff;
+  box-shadow: 0 10rpx 24rpx rgba(31, 111, 235, 0.25);
+}
+
+.todo-left {
+  display: flex;
+  align-items: baseline;
+  gap: 12rpx;
+}
+
+.todo-num {
+  font-size: 52rpx;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.todo-label {
+  font-size: 26rpx;
+  opacity: 0.9;
+}
+
+.todo-desc {
+  font-size: 22rpx;
+  opacity: 0.85;
+  max-width: 380rpx;
+  text-align: right;
+  line-height: 1.5;
+}
+
+.todo-dot {
+  display: inline-block;
+  width: 14rpx;
+  height: 14rpx;
+  border-radius: 50%;
+  background: #ef4444;
+  margin-right: 10rpx;
+  vertical-align: middle;
+}

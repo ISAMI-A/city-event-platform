@@ -1,0 +1,122 @@
+.login-page {
+  min-height: 100vh;
+  padding: 0 40rpx calc(48rpx + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  background: linear-gradient(160deg, #0b2f6b 0%, #174f9e 45%, #1f6feb 100%);
+}
+
+.hero {
+  padding: 120rpx 8rpx 44rpx;
+  color: #ffffff;
+}
+
+.hero-badge {
+  display: inline-block;
+  padding: 6rpx 20rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.45);
+  border-radius: 999rpx;
+  font-size: 20rpx;
+  letter-spacing: 4rpx;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.hero-title {
+  margin-top: 28rpx;
+  font-size: 46rpx;
+  font-weight: 700;
+  letter-spacing: 2rpx;
+}
+
+.hero-sub {
+  margin-top: 14rpx;
+  font-size: 24rpx;
+  letter-spacing: 2rpx;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.login-card {
+  padding: 40rpx 32rpx;
+  border-radius: 28rpx;
+  background: #ffffff;
+  box-shadow: 0 20rpx 60rpx rgba(2, 18, 48, 0.32);
+}
+
+.panel-head {
+  margin-bottom: 28rpx;
+}
+
+.panel-title {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.panel-sub {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  line-height: 1.5;
+  color: #9ca3af;
+}
+
+.login-card .input {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+.login-card .btn {
+  width: 100%;
+  margin-top: 20rpx;
+}
+
+.wx-btn {
+  background: #07c160;
+}
+
+.wx-btn[disabled] {
+  background: #9dd9b8;
+  color: #ffffff;
+}
+
+.switch-link {
+  margin-top: 26rpx;
+  text-align: center;
+  font-size: 26rpx;
+  color: #1f6feb;
+}
+
+.switch-link.subtle {
+  margin-top: 14rpx;
+  color: #9ca3af;
+}
+
+.page-foot {
+  margin-top: 48rpx;
+  text-align: center;
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.avatar-btn {
+  width: 140rpx;
+  height: 140rpx;
+  padding: 0;
+  margin: 0 0 24rpx;
+  border-radius: 50%;
+  background: #fafafa;
+  border: 1rpx dashed #d1d5db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  line-height: 1;
+}
+
+.avatar {
+  width: 140rpx;
+  height: 140rpx;
+}
+
+.avatar-placeholder {
+  font-size: 24rpx;
+  color: #9ca3af;
+}

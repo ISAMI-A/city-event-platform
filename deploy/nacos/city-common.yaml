@@ -1,0 +1,25 @@
+# Nacos 共享配置示例（Data ID: city-common.yaml，Group: CITY_PLATFORM，格式: YAML）
+# 用途：统一日志级别、Jackson、MyBatis-Plus 等可动态调整项。
+# 注意：数据源与密钥不要放这里，统一由环境变量注入。
+
+spring:
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+    default-property-inclusion: non_null
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    banner: false
+    db-config:
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+logging:
+  level:
+    com.city.platform: info
+    com.alibaba.nacos: warn
+    com.alibaba.druid: warn

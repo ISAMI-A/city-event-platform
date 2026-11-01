@@ -1,0 +1,20 @@
+# 本机最小启动模式：关闭 Nacos，Feign 使用静态地址；数据库允许暂不可用。
+spring:
+  cloud:
+    nacos:
+      discovery:
+        enabled: false
+      config:
+        enabled: false
+  datasource:
+    druid:
+      initial-size: 0
+      async-init: true
+
+city:
+  feign:
+    user-service-url: ${USER_SERVICE_URL:http://127.0.0.1:8081}
+
+logging:
+  level:
+    com.city.platform.workorder: debug

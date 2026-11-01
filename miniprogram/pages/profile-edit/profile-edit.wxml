@@ -1,0 +1,144 @@
+<view class="page">
+  <view class="error" wx:if="{{loadError}}">{{loadError}}</view>
+
+  <!-- 头像与昵称 -->
+  <view class="card">
+    <view class="title small">头像与昵称</view>
+    <view class="avatar-row">
+      <view class="avatar-wrap" bindtap="chooseAvatar">
+        <image wx:if="{{avatarPreview}}" class="avatar" src="{{avatarPreview}}" mode="aspectFill"></image>
+        <view wx:else class="avatar avatar-placeholder">{{avatarText}}</view>
+        <view class="avatar-mask">{{uploading ? '上传中' : '更换'}}</view>
+      </view>
+      <view class="avatar-tip">点击头像从相册或相机选择</view>
+    </view>
+    <view class="field-error" wx:if="{{avatarError}}">{{avatarError}}</view>
+    <view class="label">昵称</view>
+    <input class="input" maxlength="20" placeholder="请输入昵称" value="{{nicknameInput}}" bindinput="onNicknameInput"></input>
+    <view class="field-error" wx:if="{{nicknameError}}">{{nicknameError}}</view>
+    <button class="btn" loading="{{savingProfile}}" disabled="{{savingProfile}}" bindtap="saveProfile">保存资料</button>
+  </view>
+
+  <!-- 登录账号 -->
+  <view class="card">
+    <view class="title small">登录账号</view>
+    <view class="info-row">
+      <text class="info-key">当前</text>
+      <text class="info-value">{{username || '-'}}</text>
+    </view>
+    <button class="btn btn-secondary" bindtap="togglePanel" data-name="username">修改账号</button>
+
+    <view class="panel" wx:if="{{panel === 'username'}}">
+      <view class="label">新账号</view>
+      <input class="input" maxlength="32" placeholder="字母开头，4-32 位字母、数字或下划线" value="{{usernameInput}}" bindinput="onUsernameInput"></input>
+      <view wx:if="{{hasPassword}}">
+        <view class="label">当前登录密码</view>
+        <input class="input" password maxlength="32" placeholder="请输入当前登录密码" value="{{usernamePassword}}" bindinput="onUsernamePasswordInput"></input>
+      </view>
+      <view class="field-error" wx:if="{{usernameError}}">{{usernameError}}</view>
+      <view class="panel-actions">
+        <button class="btn btn-secondary" bindtap="togglePanel" data-name="username">取消</button>
+        <button class="btn" loading="{{usernameSaving}}" disabled="{{usernameSaving}}" bindtap="saveUsername">保存</button>
+      </view>
+    </view>
+    <view class="muted-tip">账号全局唯一，可自定义修改；已被占用时会提示更换</view>
+  </view>
+
+  <!-- 手机号 -->
+  <view class="card">
+    <view class="title small">手机号</view>
+    <view class="info-row">
+      <text class="info-key">当前</text>
+      <text class="info-value">{{phone || '未绑定'}}</text>
+    </view>
+    <button class="btn btn-secondary" bindtap="togglePanel" data-name="phone">{{phone ? '更换手机号' : '立即绑定'}}</button>
+
+    <view class="panel" wx:if="{{panel === 'phone'}}">
+      <view class="label">新手机号</view>
+      <input class="input" type="number" maxlength="11" placeholder="请输入 11 位手机号" value="{{phoneInput}}" bindinput="onPhoneInput"></input>
+      <view wx:if="{{phone && hasPassword}}">
+        <view class="label">当前登录密码</view>
+        <input class="input" password maxlength="32" placeholder="请输入当前登录密码" value="{{phonePassword}}" bindinput="onPhonePasswordInput"></input>
+      </view>
+      <view class="muted-tip" wx:if="{{phone && !hasPassword}}">请先设置登录密码，再更换手机号</view>
+      <view class="field-error" wx:if="{{phoneError}}">{{phoneError}}</view>
+      <view class="panel-actions">
+        <button class="btn btn-secondary" bindtap="togglePanel" data-name="phone">取消</button>
+        <button class="btn" loading="{{phoneSaving}}" disabled="{{phoneSaving}}" bindtap="savePhone">保存</button>
+      </view>
+    </view>
+    <view class="muted-tip" wx:if="{{!phone}}">手机号仅做唯一校验；绑定后管理员才能在报名时联系你</view>
+  </view>
+
+  <!-- 邮箱 -->
+  <view class="card">
+    <view class="title small">邮箱</view>
+    <view class="info-row">
+      <text class="info-key">当前</text>
+      <text class="info-value">{{email ? email + (emailVerified ? '（已验证）' : '（未验证）') : '未绑定'}}</text>
+    </view>
+    <button class="btn btn-secondary" bindtap="togglePanel" data-name="email">{{email ? '更换邮箱' : '立即绑定'}}</button>
+
+    <view class="panel" wx:if="{{panel === 'email'}}">
+      <view class="label">新邮箱</view>
+      <input class="input" type="text" maxlength="128" placeholder="请输入邮箱地址" value="{{emailInput}}" bindinput="onEmailInput"></input>
+      <view class="code-row">
+        <input class="input code-input" type="number" maxlength="6" placeholder="6 位验证码" value="{{emailCode}}" bindinput="onEmailCodeInput"></input>
+        <button class="btn btn-secondary code-btn" size="mini" loading="{{emailCodeSending}}" disabled="{{emailCountdown > 0 || emailCodeSending}}" bindtap="sendEmailCode">{{emailCountdown > 0 ? emailCountdown + 's' : '发送验证码'}}</button>
+      </view>
+      <view wx:if="{{email && hasPassword}}">
+        <view class="label">当前登录密码</view>
+        <input class="input" password maxlength="32" placeholder="请输入当前登录密码" value="{{emailPassword}}" bindinput="onEmailPasswordInput"></input>
+      </view>
+      <view class="muted-tip" wx:if="{{email && !hasPassword}}">请先设置登录密码，再更换邮箱</view>
+      <view class="field-error" wx:if="{{emailError}}">{{emailError}}</view>
+      <view class="panel-actions">
+        <button class="btn btn-secondary" bindtap="togglePanel" data-name="email">取消</button>
+        <button class="btn" loading="{{emailSaving}}" disabled="{{emailSaving}}" bindtap="saveEmail">保存</button>
+      </view>
+    </view>
+
+    <button class="btn btn-secondary" wx:if="{{email}}" loading="{{emailSaving}}" disabled="{{emailSaving}}" bindtap="unbindEmail">解绑邮箱</button>
+    <view class="muted-tip">验证码 5 分钟内有效；绑定或更换后管理员可通过邮箱联系你</view>
+  </view>
+
+  <!-- 登录密码 -->
+  <view class="card">
+    <view class="title small">登录密码</view>
+    <view class="info-row">
+      <text class="info-key">状态</text>
+      <text class="info-value">{{hasPassword ? '已设置' : '未设置'}}</text>
+    </view>
+    <button class="btn btn-secondary" bindtap="togglePanel" data-name="password">{{hasPassword ? '修改密码' : '设置密码'}}</button>
+
+    <view class="panel" wx:if="{{panel === 'password'}}">
+      <view wx:if="{{hasPassword}}">
+        <view class="label">原密码</view>
+        <input class="input" password maxlength="32" placeholder="请输入原密码" value="{{oldPassword}}" bindinput="onOldPasswordInput"></input>
+      </view>
+      <view class="label">新密码</view>
+      <input class="input" password maxlength="32" placeholder="8-32 位新密码" value="{{newPassword}}" bindinput="onNewPasswordInput"></input>
+      <view class="label">确认新密码</view>
+      <input class="input" password maxlength="32" placeholder="请再次输入新密码" value="{{confirmPassword}}" bindinput="onConfirmPasswordInput"></input>
+      <view class="field-error" wx:if="{{passwordError}}">{{passwordError}}</view>
+      <view class="panel-actions">
+        <button class="btn btn-secondary" bindtap="togglePanel" data-name="password">取消</button>
+        <button class="btn" loading="{{passwordSaving}}" disabled="{{passwordSaving}}" bindtap="savePassword">保存</button>
+      </view>
+    </view>
+    <view class="muted-tip">设置密码后，即使解绑微信也能用账号密码登录</view>
+  </view>
+
+  <!-- 微信绑定 -->
+  <view class="card">
+    <view class="title small">微信绑定</view>
+    <view class="info-row">
+      <text class="info-key">绑定状态</text>
+      <text class="info-value">{{wxBound ? '已绑定当前微信' : '未绑定'}}</text>
+    </view>
+    <button class="btn btn-secondary" wx:if="{{!wxBound}}" loading="{{wxLoading}}" disabled="{{wxLoading}}" bindtap="bindWechat">绑定当前微信</button>
+    <button class="btn btn-secondary" wx:if="{{wxBound}}" loading="{{wxLoading}}" disabled="{{wxLoading}}" bindtap="unbindWechat">解绑微信</button>
+    <view class="field-error" wx:if="{{wxError}}">{{wxError}}</view>
+    <view class="muted-tip">绑定后可用微信一键登录；解绑需账号已设置密码</view>
+  </view>
+</view>

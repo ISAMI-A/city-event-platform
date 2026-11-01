@@ -1,0 +1,189 @@
+<view class="page">
+  <view class="empty" wx:if="{{loading}}">加载中…</view>
+  <view class="error" wx:if="{{loadError}}">{{loadError}}</view>
+
+  <block wx:if="{{detail}}">
+    <!-- 工单摘要 -->
+    <view class="card">
+      <view class="row">
+        <view class="title" style="margin:0;">{{detail.workOrderNo}}</view>
+        <view class="tag">{{detail.statusText}}</view>
+      </view>
+      <view class="timeline-text" style="margin-top:10rpx;">事件：{{detail.eventNo}}</view>
+      <view class="timeline-text" wx:if="{{detail.event}}">{{detail.event.title}}</view>
+      <view class="timeline-text" wx:if="{{detail.event}}">{{detail.event.description}}</view>
+      <view class="timeline-text">责任组长：{{detail.leaderName || '-'}}｜处理人：{{detail.assigneeName || '-'}}</view>
+      <view class="label" style="margin-top:8rpx;">退回次数：{{detail.returnCount}}</view>
+    </view>
+
+    <!-- 处理操作：撤销接单 / 撤回处理结果 -->
+    <view class="card" wx:if="{{detail.assigneeId === myUserId && (detail.status === 'PROCESSING' || detail.status === 'PENDING_LEADER_REVIEW' || detail.status === 'PENDING_ACCEPTANCE')}}">
+      <view class="title small">处理操作</view>
+      <view class="timeline-text" wx:if="{{detail.status === 'PROCESSING'}}">如需放弃本次接单，可撤销后由组长重新安排处理人。</view>
+      <view class="timeline-text" wx:else>如需修改整改内容，可撤回已提交的结果重新处理。</view>
+      <button class="btn btn-secondary" wx:if="{{detail.status === 'PROCESSING'}}" style="margin-top:16rpx;"
+              loading="{{undoLoading}}" disabled="{{undoLoading}}" bindtap="cancelAccept">撤销接单</button>
+      <button class="btn btn-secondary" wx:else style="margin-top:16rpx;"
+              loading="{{withdrawLoading}}" disabled="{{withdrawLoading}}" bindtap="withdrawSubmit">撤回提交的处理结果</button>
+      <view class="error" wx:if="{{undoError}}">{{undoError}}</view>
+    </view>
+
+    <!-- 事发位置：地图 + 一键导航 -->
+    <view class="card" wx:if="{{detail.event}}">
+      <view class="title small">事发位置</view>
+      <view class="timeline-text">{{detail.event.address || '居民未填写地址'}}</view>
+      <map wx:if="{{detail.hasLocation}}" class="event-map"
+           latitude="{{detail.event.latitude}}" longitude="{{detail.event.longitude}}"
+           scale="16" markers="{{markers}}" show-location="{{false}}"></map>
+      <view class="empty" wx:else style="padding:36rpx 0;">该事件没有坐标信息</view>
+      <button class="btn btn-secondary" wx:if="{{detail.hasLocation}}" bindtap="openNavigation">调起手机地图导航</button>
+      <view class="muted-tip" wx:if="{{detail.hasLocation}}">将打开手机自带地图应用并进入导航</view>
+    </view>
+
+    <!-- 居民上报原图 -->
+    <view class="card" wx:if="{{detail.eventPhotos.length}}">
+      <view class="title small">居民上报原图</view>
+      <view class="photo-grid">
+        <view class="photo-cell" wx:for="{{detail.eventPhotos}}" wx:key="id">
+          <image class="photo-img" src="{{item.url}}" mode="aspectFill" data-src="{{item.url}}" bindtap="previewEventPhoto" binderror="onThumbError"></image>
+        </view>
+      </view>
+      <view class="muted-tip">点击照片可放大，便于对照整改结果</view>
+    </view>
+
+    <!-- 验收意见 -->
+    <view class="card" wx:if="{{detail.acceptance || detail.acceptanceRemark}}">
+      <view class="title small">验收意见</view>
+      <view class="timeline-text" wx:if="{{detail.acceptance}}">
+        验收结果：{{detail.acceptance.result === 'PASS' ? '通过' : '退回'}}
+      </view>
+      <view class="timeline-text" wx:if="{{detail.acceptance && detail.acceptance.remark}}">
+        退回原因：{{detail.acceptance.remark}}
+      </view>
+      <view class="timeline-text" wx:if="{{detail.acceptanceRemark && !detail.acceptance}}">退回原因：{{detail.acceptanceRemark}}</view>
+    </view>
+
+    <!-- 组长复核意见 -->
+    <view class="card" wx:if="{{detail.leaderReviewRemark || detail.leaderReviewTime}}">
+      <view class="title small">组长复核</view>
+      <view class="timeline-text">{{detail.leaderReviewRemark || '复核通过，已提交管理员验收'}}</view>
+      <view class="timeline-time" wx:if="{{detail.leaderReviewTime}}">{{detail.leaderReviewTime}}</view>
+    </view>
+
+    <!-- 待接单：普通处理人接单 -->
+    <view class="card" wx:if="{{!isLeader && detail.status === 'PENDING_ACCEPT' && detail.assigneeId === myUserId}}">
+      <button class="btn" loading="{{submitting}}" disabled="{{submitting}}" bindtap="accept">接单</button>
+      <view class="error" wx:if="{{acceptError}}">{{acceptError}}</view>
+    </view>
+
+    <!-- 组长：待接单时二选一，自己处理或分配给组员 -->
+    <view class="card" wx:if="{{isLeader && detail.status === 'PENDING_ACCEPT'}}">
+      <view class="title small">{{detail.assigneeId === myUserId ? '选择处理方式' : '调整处理人'}}</view>
+      <view class="timeline-text">{{detail.assigneeId === myUserId ? '你可以自己接单处理，也可以把工单分配给本组组员。' : '工单已分配给组员，如需调整请重新选择本组组员。'}}</view>
+      <button class="btn" wx:if="{{detail.assigneeId === myUserId}}" style="margin-top:16rpx;" loading="{{submitting}}" disabled="{{submitting}}" bindtap="accept">自己接单处理</button>
+      <view class="split-line"></view>
+      <view class="label">分配给组员</view>
+      <view class="timeline-text" wx:if="{{teamMembers.length === 0}}">暂无组员，请先联系管理员维护团队</view>
+      <picker wx:else mode="selector" range="{{teamMembers}}" range-key="nickname" value="{{assignIndex}}" bindchange="onAssignChange">
+        <view class="picker-row">
+          <text class="info-key">选择组员</text>
+          <text class="info-value">{{assignIndex >= 0 && teamMembers[assignIndex] ? teamMembers[assignIndex].nickname : '请选择'}}</text>
+        </view>
+      </picker>
+      <button class="btn btn-secondary" style="margin-top:16rpx;" loading="{{assigning}}" disabled="{{assigning || teamMembers.length === 0}}" bindtap="assignToMember">确认分配</button>
+      <view class="muted-tip">接单后由你本人处理；分配后由组员接单处理，工单仍回到待接单状态</view>
+      <view class="error" wx:if="{{assignError}}">{{assignError}}</view>
+    </view>
+
+    <!-- 组长处理中：可转交给组员继续处理 -->
+    <view class="card" wx:if="{{isLeader && detail.status === 'PROCESSING'}}">
+      <view class="title small">转交给组员</view>
+      <view class="timeline-text" wx:if="{{teamMembers.length === 0}}">暂无组员，请先联系管理员维护团队</view>
+      <picker wx:else mode="selector" range="{{teamMembers}}" range-key="nickname" value="{{assignIndex}}" bindchange="onAssignChange">
+        <view class="picker-row">
+          <text class="info-key">选择组员</text>
+          <text class="info-value">{{assignIndex >= 0 && teamMembers[assignIndex] ? teamMembers[assignIndex].nickname : '请选择'}}</text>
+        </view>
+      </picker>
+      <button class="btn btn-secondary" style="margin-top:16rpx;" loading="{{assigning}}" disabled="{{assigning || teamMembers.length === 0}}" bindtap="assignToMember">确认转交</button>
+      <view class="muted-tip">转交后由组员接单继续处理；不转交则继续由当前处理人操作</view>
+      <view class="error" wx:if="{{assignError}}">{{assignError}}</view>
+    </view>
+
+    <!-- 组长复核组员提交结果 -->
+    <view class="card" wx:if="{{isLeader && detail.status === 'PENDING_LEADER_REVIEW'}}">
+      <view class="title small">组长复核</view>
+      <view class="timeline-text">组员已提交整改结果，请对照居民原图与整改后照片确认是否达标。</view>
+      <textarea class="textarea" maxlength="255" placeholder="复核意见（退回时必填）" value="{{leaderRemark}}" bindinput="onLeaderRemarkInput"></textarea>
+      <view class="row" style="margin-top:16rpx;">
+        <button class="btn btn-secondary" style="flex:1;margin:0 10rpx 0 0;" loading="{{reviewSubmitting}}" disabled="{{reviewSubmitting}}" data-pass="false" bindtap="reviewLeader">退回整改</button>
+        <button class="btn" style="flex:1;margin:0;" loading="{{reviewSubmitting}}" disabled="{{reviewSubmitting}}" data-pass="true" bindtap="reviewLeader">复核通过</button>
+      </view>
+      <view class="muted-tip">复核通过后由管理员验收；管理员验收通过后事件关闭</view>
+      <view class="error" wx:if="{{reviewError}}">{{reviewError}}</view>
+    </view>
+
+    <!-- 居民评价 -->
+    <view class="card" wx:if="{{detail.rating}}">
+      <view class="title small">居民评价</view>
+      <view class="timeline-text" style="color:#f59e0b;">{{detail.rating.rating}} 星</view>
+      <view class="timeline-text" wx:if="{{detail.rating.comment}}">{{detail.rating.comment}}</view>
+    </view>
+
+    <!-- 处理中：处理过程记录（选填，失焦与选择照片后自动保存） -->
+    <view class="card" wx:if="{{detail.status === 'PROCESSING' && detail.assigneeId === myUserId}}">
+      <view class="title small">处理过程记录（选填）</view>
+      <view class="textarea-scroll">
+        <textarea class="textarea auto-textarea" auto-height maxlength="1000" placeholder="记录处理过程，失焦后自动保存（与照片至少填写一项）" value="{{processContent}}" bindinput="onProcessContentInput" bindblur="onProcessContentBlur"></textarea>
+      </view>
+      <button class="btn btn-secondary" style="margin-top:16rpx;" disabled="{{processSaving}}" bindtap="chooseProcessPhotos">上传过程照片（{{processPhotos.length}}/9）</button>
+      <view class="photo-grid" wx:if="{{processPhotos.length}}">
+        <view class="photo-cell" wx:for="{{processPhotos}}" wx:key="id">
+          <image class="photo-img" src="{{item.url}}" mode="aspectFill" data-src="{{item.url}}" bindtap="previewProcessPhoto" binderror="onThumbError"></image>
+          <view class="photo-del" data-index="{{index}}" catchtap="removeProcessPhoto">×</view>
+        </view>
+      </view>
+      <view class="muted-tip">{{processSaving ? '保存中…' : '输入框失焦或选择照片后自动保存到处理记录'}}</view>
+      <view class="error" wx:if="{{processError}}">{{processError}}</view>
+    </view>
+
+    <!-- 处理中：提交处理结果 + AI 生成处理说明 -->
+    <view class="card" wx:if="{{detail.status === 'PROCESSING' && detail.assigneeId === myUserId}}">
+      <view class="title small">提交处理结果</view>
+      <view class="textarea-scroll">
+        <textarea class="textarea auto-textarea" auto-height maxlength="1000" placeholder="填写处理说明，或先点下方由 AI 生成（提交不少于 10 字）" value="{{content}}" bindinput="onContentInput"></textarea>
+      </view>
+      <button class="btn btn-secondary" style="margin-top:16rpx;" bindtap="choosePhotos">上传整改后照片（{{photos.length}}/9）</button>
+      <view class="photo-grid" wx:if="{{photos.length}}">
+        <view class="photo-cell" wx:for="{{photos}}" wx:key="*this">
+          <image class="photo-img" src="{{item}}" mode="aspectFill" data-src="{{item}}" bindtap="previewPhoto" binderror="onThumbError"></image>
+          <view class="photo-del" data-index="{{index}}" catchtap="removePhoto">×</view>
+        </view>
+      </view>
+
+      <button class="btn btn-secondary" style="margin-top:16rpx;" loading="{{aiLoading}}" disabled="{{aiLoading}}" bindtap="generateDraft">AI 生成处理说明</button>
+      <view class="muted-tip">AI 会结合事件描述与整改后照片生成说明，生成后可直接修改</view>
+      <view class="error" wx:if="{{aiError}}">{{aiError}}</view>
+
+      <button class="btn" loading="{{submitting}}" disabled="{{submitting}}" bindtap="submit">提交结果</button>
+      <view class="error" wx:if="{{submitError}}">{{submitError}}</view>
+    </view>
+
+    <!-- 处理记录 -->
+    <view class="card">
+      <view class="title small">处理记录</view>
+      <view class="empty" wx:if="{{detail.logRows.length === 0}}">暂无处理记录</view>
+      <view class="timeline-item" wx:for="{{detail.logRows}}" wx:key="index">
+        <view class="timeline-text">{{item.actionText}}{{item.content ? '：' + item.content : ''}}</view>
+        <view class="timeline-time">{{item.createTime}}</view>
+        <view class="log-actions" wx:if="{{item.images.length || item.canDelete}}">
+          <view class="log-link" wx:if="{{item.images.length}}" data-index="{{index}}" catchtap="previewLogPhotos">查看照片（{{item.images.length}} 张）</view>
+          <view class="log-del" wx:if="{{item.canDelete}}" data-index="{{index}}" catchtap="deleteProcessLog">
+            {{deletingLogId === item.id ? '删除中…' : '删除记录'}}
+          </view>
+        </view>
+      </view>
+      <view class="error" wx:if="{{logError}}">{{logError}}</view>
+    </view>
+  </block>
+</view>

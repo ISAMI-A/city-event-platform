@@ -1,0 +1,42 @@
+<view class="page">
+  <view class="row head">
+    <view class="title" style="margin:0;">消息通知</view>
+    <view class="unread-tag" wx:if="{{unread > 0}}">{{unread}} 条未读</view>
+  </view>
+
+  <view class="quick" wx:if="{{isLeader}}">
+    <button class="btn" style="margin:0;" bindtap="openNotice">发布注意事项</button>
+    <button class="btn btn-secondary" style="margin:0;" bindtap="load">刷新</button>
+  </view>
+
+  <view class="error" wx:if="{{error}}">{{error}}</view>
+  <view class="empty" wx:if="{{loading}}">加载中…</view>
+  <view class="empty" wx:elif="{{list.length === 0}}">暂无通知</view>
+
+  <view class="card notice {{item.readClass}}" wx:for="{{list}}" wx:key="id" data-id="{{item.id}}" bindtap="openDetail">
+    <view class="row">
+      <view class="title small">
+        <view class="dot" wx:if="{{!item.isRead}}"></view>{{item.title}}
+      </view>
+      <view class="tag tag-blue">{{item.typeText}}</view>
+    </view>
+    <view class="notice-text" style="margin-top:8rpx;">{{item.bodyText}}</view>
+    <view class="row" style="margin-top:8rpx;">
+      <view class="label">{{item.timeText}}</view>
+      <view class="link" wx:if="{{item.canForward}}" catchtap="onForward" data-wo="{{item.bizId}}">通知组员</view>
+    </view>
+    <view class="receipt" wx:if="{{item.receiptText}}">{{item.receiptText}}</view>
+  </view>
+
+  <view class="mask" wx:if="{{noticePanel}}" catchtap="closeNotice">
+    <view class="panel" catchtap="noop">
+      <view class="title small">发布注意事项</view>
+      <view class="label" style="margin-top:6rpx;">发布后本组所有在岗组员都会收到通知</view>
+      <textarea class="input textarea" placeholder="例如：雨天作业先设置围挡，整改后必须拍摄全景点位照片。" value="{{noticeText}}" bindinput="onNoticeInput" maxlength="400"></textarea>
+      <view class="row" style="margin-top:16rpx;">
+        <button class="btn btn-secondary" style="margin:0;" bindtap="closeNotice">取消</button>
+        <button class="btn" style="margin:0;" loading="{{saving}}" bindtap="submitNotice">发布</button>
+      </view>
+    </view>
+  </view>
+</view>

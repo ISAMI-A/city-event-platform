@@ -1,0 +1,17 @@
+# 本机最小启动模式：无 Nacos、允许数据库暂不可用（仅用于验证应用上下文与接口骨架）。
+# Nacos 配置导入为 optional，未启动 Nacos 时仅打印空配置告警，不阻断启动；该模式不注册服务。
+spring:
+  cloud:
+    nacos:
+      discovery:
+        enabled: false
+      config:
+        enabled: false
+  datasource:
+    druid:
+      initial-size: 0
+      async-init: true
+
+logging:
+  level:
+    com.city.platform.user: debug

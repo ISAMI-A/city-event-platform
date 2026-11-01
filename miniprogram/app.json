@@ -1,0 +1,53 @@
+{
+  "pages": [
+    "pages/login/login",
+    "pages/report/report",
+    "pages/events/events",
+    "pages/detail/detail",
+    "pages/workorders/workorders",
+    "pages/workorder-detail/workorder-detail",
+    "pages/team/team",
+    "pages/recruitment-detail/recruitment-detail",
+    "pages/profile/profile",
+    "pages/profile-edit/profile-edit",
+    "pages/notifications/notifications",
+    "pages/notification-detail/notification-detail"
+  ],
+  "tabBar": {
+    "custom": true,
+    "color": "#6b7280",
+    "selectedColor": "#1f6feb",
+    "backgroundColor": "#ffffff",
+    "list": [
+      {
+        "pagePath": "pages/events/events",
+        "text": "我的事件"
+      },
+      {
+        "pagePath": "pages/workorders/workorders",
+        "text": "我的工单"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "我的"
+      }
+    ]
+  },
+  "window": {
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "城市事件上报",
+    "navigationBarBackgroundColor": "#1f6feb",
+    "backgroundColor": "#f5f7fa"
+  },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "用于上报事件时选择事发位置"
+    }
+  },
+  "requiredPrivateInfos": [
+    "chooseLocation"
+  ],
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

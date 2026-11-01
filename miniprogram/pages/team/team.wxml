@@ -1,0 +1,22 @@
+<view class="page">
+  <view class="card">
+    <view class="title" style="margin:0;">我的团队</view>
+    <view class="timeline-text" style="margin-top:8rpx;">负责片区：{{workZone}}｜组员 {{teamSize}} 人</view>
+    <view class="muted-tip">组员工单由组长分配，整改完成后由组长复核，再提交管理员验收</view>
+  </view>
+
+  <view class="error" wx:if="{{error}}">{{error}}</view>
+  <view class="empty" wx:if="{{loading}}">加载中…</view>
+  <view class="empty" wx:elif="{{members.length === 0}}">暂无组员，请联系管理员维护团队</view>
+
+  <view class="card" wx:for="{{members}}" wx:key="id">
+    <view class="row">
+      <view class="title" style="font-size:30rpx;margin:0;">{{item.nickname}}</view>
+      <view class="tag {{item.statusText === '在岗' ? 'tag-green' : ''}}">{{item.statusText}}</view>
+    </view>
+    <view class="timeline-text">片区：{{item.workZone}}｜在办工单：{{item.activeCount}}</view>
+    <view class="timeline-text" style="margin-top:8rpx;">本月完成 {{item.completedCount}} 单｜平均评分 {{item.avgRating}}</view>
+    <view class="timeline-text">平均处理时长 {{item.avgHours}} 小时｜退回 {{item.returnCount}} 次</view>
+    <view class="timeline-text" style="color:#1f6feb;font-weight:600;">绩效分：{{item.score}}</view>
+  </view>
+</view>

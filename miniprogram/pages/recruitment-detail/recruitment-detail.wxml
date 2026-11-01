@@ -1,0 +1,36 @@
+<view class="page">
+  <view class="empty" wx:if="{{loading}}">加载中…</view>
+  <view class="error" wx:if="{{error}}">{{error}}</view>
+
+  <block wx:if="{{item}}">
+    <image wx:if="{{cover}}" class="cover" src="{{cover}}" mode="aspectFill"></image>
+
+    <view class="card">
+      <view class="row">
+        <view class="title" style="margin:0;">{{item.title}}</view>
+        <view class="tag {{item.status === 'OPEN' ? 'tag-green' : ''}}">{{item.status === 'OPEN' ? '招募中' : '已结束'}}</view>
+      </view>
+      <view class="timeline-text" style="margin-top:10rpx;">部门：{{item.deptName || '-'}}｜片区：{{item.workZone || '-'}}</view>
+      <view class="timeline-text">招募人数：{{item.headcount || 1}} 人｜已报名 {{item.applyCount || 0}} 人</view>
+      <view class="timeline-text">报名截止：{{item.deadlineText}}</view>
+    </view>
+
+    <view class="card" wx:if="{{item.requirement}}">
+      <view class="title small">岗位要求</view>
+      <view class="timeline-text">{{item.requirement}}</view>
+    </view>
+
+    <view class="card" wx:if="{{item.description}}">
+      <view class="title small">岗位说明</view>
+      <view class="timeline-text">{{item.description}}</view>
+    </view>
+
+    <view class="card">
+      <view class="title small">报名留言</view>
+      <textarea class="textarea" maxlength="200" placeholder="选填，可简单介绍自己（如相关工作经验）" value="{{note}}" bindinput="onNoteInput"></textarea>
+      <button class="btn" style="margin-top:16rpx;" wx:if="{{item.appliedByMe}}" disabled="{{true}}">已报名，等待管理员审核</button>
+      <button class="btn" style="margin-top:16rpx;" wx:else loading="{{applying}}" disabled="{{applying || item.status !== 'OPEN'}}" bindtap="apply">立即报名</button>
+      <view class="muted-tip">报名后管理员会联系你核实信息，录用结果可在个人资料页查看</view>
+    </view>
+  </block>
+</view>

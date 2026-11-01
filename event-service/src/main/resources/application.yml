@@ -1,0 +1,145 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: event-service
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  config:
+    import:
+      - optional:nacos:city-common.yaml?group=CITY_PLATFORM&refreshEnabled=true
+      - optional:nacos:event-service.yaml?group=CITY_PLATFORM&refreshEnabled=true
+  cloud:
+    nacos:
+      server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
+      discovery:
+        enabled: ${NACOS_DISCOVERY_ENABLED:true}
+        group: CITY_PLATFORM
+        namespace: ${NACOS_NAMESPACE:public}
+      config:
+        enabled: ${NACOS_CONFIG_ENABLED:true}
+        group: CITY_PLATFORM
+        namespace: ${NACOS_NAMESPACE:public}
+        file-extension: yaml
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${MYSQL_HOST:127.0.0.1}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:city_event}?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true
+    username: ${MYSQL_USERNAME:root}
+    password: ${MYSQL_PASSWORD:}
+    druid:
+      initial-size: ${DRUID_INITIAL_SIZE:2}
+      min-idle: 2
+      max-active: 20
+      max-wait: 5000
+      validation-query: SELECT 1
+      test-while-idle: true
+      async-init: ${DRUID_ASYNC_INIT:false}
+      fail-fast: false
+      stat-view-servlet:
+        enabled: ${DRUID_STAT_ENABLED:false}
+      filter:
+        stat:
+          enabled: true
+          log-slow-sql: true
+          slow-sql-millis: 1000
+  data:
+    redis:
+      host: ${REDIS_HOST:127.0.0.1}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: 0
+      timeout: 3s
+      lettuce:
+        pool:
+          max-active: 16
+          max-idle: 8
+          min-idle: 2
+  rabbitmq:
+    host: ${RABBITMQ_HOST:127.0.0.1}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    virtual-host: ${RABBITMQ_VHOST:/}
+    connection-timeout: 3s
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    listener:
+      simple:
+        acknowledge-mode: manual
+        prefetch: 10
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+    default-property-inclusion: non_null
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 30MB
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+  global-config:
+    banner: false
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+sa-token:
+  token-name: Authorization
+  token-prefix: Bearer
+  timeout: 7200
+  active-timeout: -1
+  is-concurrent: true
+  is-share: false
+  token-style: uuid
+  is-log: false
+
+city:
+  security:
+    internal-token: ${INTERNAL_TOKEN:}
+  file:
+    root: ${UPLOAD_ROOT:data/uploads}
+    access-base-url: ${FILE_ACCESS_BASE_URL:/uploads}
+    max-size: 5242880
+  feign:
+    user-service-url: ${USER_SERVICE_URL:}
+    map-service-url: ${MAP_SERVICE_URL:}
+    ai-service-url: ${AI_SERVICE_URL:}
+    workorder-service-url: ${WORKORDER_SERVICE_URL:}
+
+seata:
+  enabled: ${SEATA_ENABLED:true}
+  application-id: ${spring.application.name}
+  tx-service-group: ${SEATA_TX_GROUP:city_tx_group}
+  service:
+    vgroup-mapping:
+      city_tx_group: default
+    grouplist:
+      default: ${SEATA_ADDR:127.0.0.1:8091}
+  registry:
+    # 容器注册的 IP 为 Docker 内网地址，宿主机服务无法直连，使用 grouplist 显式直连
+    type: file
+  config:
+    type: file
+  enable-auto-data-source-proxy: true
+  data-source-proxy-mode: AT
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,loggers,env,threaddump,heapdump,httptrace,caches,scheduledtasks
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.city.platform: info
+    com.alibaba.nacos: warn

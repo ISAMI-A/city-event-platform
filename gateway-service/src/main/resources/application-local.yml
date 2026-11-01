@@ -1,0 +1,39 @@
+# 本机无 Nacos 时的最小启动/联调模式：关闭注册与配置中心，路由改为静态地址。
+# 该模式只用于本机验证，不代表服务发现的真实结果。
+spring:
+  cloud:
+    nacos:
+      discovery:
+        enabled: false
+      config:
+        enabled: false
+    gateway:
+      routes:
+        - id: system-ping
+          uri: ${CITY_USER_SERVICE_URI:http://127.0.0.1:8081}
+          predicates:
+            - Path=/api/v1/system/ping
+        - id: user-service
+          uri: ${CITY_USER_SERVICE_URI:http://127.0.0.1:8081}
+          predicates:
+            - Path=/api/v1/auth/**,/api/v1/users/**,/api/v1/workers/**,/api/v1/recruitments/**
+        - id: event-service
+          uri: ${CITY_EVENT_SERVICE_URI:http://127.0.0.1:8082}
+          predicates:
+            - Path=/api/v1/events/**,/api/v1/attachments/**,/api/v1/notifications/**
+        - id: event-uploads
+          uri: ${CITY_EVENT_SERVICE_URI:http://127.0.0.1:8082}
+          predicates:
+            - Path=/uploads/**
+        - id: workorder-service
+          uri: ${CITY_WORKORDER_SERVICE_URI:http://127.0.0.1:8083}
+          predicates:
+            - Path=/api/v1/workorders/**
+        - id: ai-service
+          uri: ${CITY_AI_SERVICE_URI:http://127.0.0.1:8084}
+          predicates:
+            - Path=/api/v1/ai/**
+        - id: map-service
+          uri: ${CITY_MAP_SERVICE_URI:http://127.0.0.1:8085}
+          predicates:
+            - Path=/api/v1/map/**

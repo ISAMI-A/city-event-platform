@@ -1,0 +1,95 @@
+<view class="login-page">
+  <view class="hero">
+    <view class="hero-badge">CITY EVENT</view>
+    <view class="hero-title">城市事件上报平台</view>
+    <view class="hero-sub">居民上报 · 智能研判 · 高效处置</view>
+  </view>
+
+  <view class="login-card">
+    <!-- 微信 / 账号密码登录 -->
+    <block wx:if="{{!bindPanel && mode !== 'register'}}">
+      <view class="panel-head">
+        <view class="panel-title">{{mode === 'wx' ? '欢迎使用' : '账号登录'}}</view>
+        <view class="panel-sub">{{mode === 'wx' ? '使用微信一键登录，快速上报城市问题' : '请输入账号与密码登录'}}</view>
+      </view>
+      <button wx:if="{{mode === 'wx'}}" class="btn wx-btn" loading="{{wxLoading}}" disabled="{{wxLoading}}" bindtap="onWxLogin">微信一键登录</button>
+
+      <block wx:if="{{mode === 'account'}}">
+        <view class="label">账号</view>
+        <input class="input" placeholder="请输入账号" value="{{username}}" bindinput="onUsernameInput" />
+        <view class="label">密码</view>
+        <input class="input" password placeholder="请输入密码" value="{{password}}" bindinput="onPasswordInput" />
+        <button class="btn" loading="{{loading}}" disabled="{{loading}}" bindtap="onLogin">登 录</button>
+      </block>
+
+      <view class="switch-link" bindtap="toggleMode">{{mode === 'wx' ? '使用账号密码登录' : '返回微信登录'}}</view>
+      <view class="switch-link subtle" wx:if="{{mode === 'account'}}" bindtap="onOpenRegister">还没有账号？注册居民账号</view>
+    </block>
+
+    <!-- 居民自助注册 -->
+    <block wx:if="{{!bindPanel && mode === 'register'}}">
+      <view class="panel-head">
+        <view class="panel-title">注册居民账号</view>
+        <view class="panel-sub">创建账号后可直接登录并上报事件</view>
+      </view>
+      <view class="label">用户名</view>
+      <input class="input" placeholder="字母开头，4-32 位字母数字下划线" value="{{regUsername}}" bindinput="onRegUsernameInput" />
+      <view class="label">密码</view>
+      <input class="input" password placeholder="8-32 位" value="{{regPassword}}" bindinput="onRegPasswordInput" />
+      <view class="label">确认密码</view>
+      <input class="input" password placeholder="再次输入密码" value="{{regConfirm}}" bindinput="onRegConfirmInput" />
+      <view class="label">昵称</view>
+      <input class="input" placeholder="2-20 个字" value="{{regNickname}}" bindinput="onRegNicknameInput" />
+      <view class="label">手机号</view>
+      <input class="input" type="number" maxlength="11" placeholder="用于报名后管理员联系你" value="{{regPhone}}" bindinput="onRegPhoneInput" />
+      <button class="btn" loading="{{regLoading}}" disabled="{{regLoading}}" bindtap="onRegister">注册并登录</button>
+      <view class="switch-link" bindtap="onBackLogin">已有账号，返回登录</view>
+    </block>
+
+    <!-- 微信首次登录 -->
+    <block wx:if="{{bindPanel}}">
+      <block wx:if="{{bindMode === ''}}">
+        <view class="panel-head">
+          <view class="panel-title">首次使用微信登录</view>
+          <view class="panel-sub">请选择你的身份，完成账号初始化</view>
+        </view>
+        <button class="btn" bindtap="onChooseResident">我是居民，首次使用</button>
+        <button class="btn btn-secondary" bindtap="onChooseWorker">我是处理人员，绑定已有账号</button>
+        <view class="switch-link" bindtap="onCancelBind">返回</view>
+      </block>
+
+      <block wx:elif="{{bindMode === 'worker'}}">
+        <view class="panel-head">
+          <view class="panel-title">绑定处理人员账号</view>
+          <view class="panel-sub">使用管理员分配的账号密码完成绑定</view>
+        </view>
+        <view class="label">账号</view>
+        <input class="input" placeholder="请输入处理人员账号" value="{{username}}" bindinput="onUsernameInput" />
+        <view class="label">密码</view>
+        <input class="input" password placeholder="请输入密码" value="{{password}}" bindinput="onPasswordInput" />
+        <button class="btn" loading="{{loading}}" disabled="{{loading}}" bindtap="onBindWorker">绑定并登录</button>
+        <view class="switch-link" bindtap="onBackChoose">返回上一步</view>
+      </block>
+
+      <block wx:else>
+        <view class="panel-head">
+          <view class="panel-title">完善居民资料</view>
+          <view class="panel-sub">头像与昵称可跳过，稍后在“我的”中修改</view>
+        </view>
+        <view class="label">头像（可跳过）</view>
+        <button class="avatar-btn" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+          <image wx:if="{{avatarTempPath}}" class="avatar" src="{{avatarTempPath}}" mode="aspectFill" />
+          <view wx:else class="avatar-placeholder">选择头像</view>
+        </button>
+        <view class="label">昵称（点击输入框可直接使用微信昵称）</view>
+        <input class="input" type="nickname" placeholder="请输入昵称" value="{{nickname}}" bindinput="onNicknameInput" bindblur="onNicknameBlur" bindnicknamereview="onNicknameReview" />
+        <button class="btn" loading="{{loading}}" disabled="{{loading}}" bindtap="onRegisterResident">完成注册</button>
+        <view class="switch-link" bindtap="onBackChoose">返回上一步</view>
+      </block>
+    </block>
+
+    <view class="error" wx:if="{{error}}">{{error}}</view>
+  </view>
+
+  <view class="page-foot">城市事件智能上报及工单调度平台</view>
+</view>

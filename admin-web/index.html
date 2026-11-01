@@ -1,0 +1,2793 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>城市事件管理后台</title>
+  <link rel="stylesheet" href="vendor/element-plus.css" />
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; background: #f5f7fa; color: #1f2937; }
+    .login-wrap { position: relative; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 32px 20px; background: radial-gradient(circle at 18% 18%, rgba(96, 165, 250, .35), transparent 42%), radial-gradient(circle at 82% 78%, rgba(56, 189, 248, .28), transparent 45%), linear-gradient(135deg, #0b2f6b 0%, #123f86 48%, #1f6feb 100%); overflow: hidden; }
+    .login-wrap::before, .login-wrap::after { content: ""; position: absolute; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .16); pointer-events: none; }
+    .login-wrap::before { width: 520px; height: 520px; top: -180px; right: -120px; }
+    .login-wrap::after { width: 360px; height: 360px; bottom: -140px; left: -80px; }
+    .login-shell { position: relative; z-index: 1; display: flex; width: 920px; max-width: 100%; min-height: 520px; border-radius: 22px; overflow: hidden; background: #fff; box-shadow: 0 30px 80px rgba(2, 18, 48, .35); }
+    .login-intro { flex: 1.05; padding: 54px 46px; color: #fff; background: linear-gradient(160deg, #0f3475 0%, #1f6feb 100%); display: flex; flex-direction: column; justify-content: center; }
+    .intro-badge { display: inline-block; align-self: flex-start; padding: 5px 12px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, .4); font-size: 11px; letter-spacing: 2px; color: rgba(255, 255, 255, .9); }
+    .login-intro h1 { margin: 22px 0 12px; font-size: 28px; line-height: 1.45; letter-spacing: 1px; }
+    .intro-sub { margin: 0; font-size: 13px; color: rgba(255, 255, 255, .78); letter-spacing: 1px; }
+    .intro-points { margin: 34px 0 0; padding: 0; list-style: none; font-size: 13.5px; color: rgba(255, 255, 255, .92); }
+    .intro-points li { position: relative; padding-left: 20px; margin-bottom: 14px; line-height: 1.6; }
+    .intro-points li::before { content: ""; position: absolute; left: 2px; top: 7px; width: 6px; height: 6px; border-radius: 50%; background: #93c5fd; box-shadow: 0 0 0 3px rgba(147, 197, 253, .24); }
+    .login-panel { flex: 0 0 430px; padding: 52px 44px; display: flex; flex-direction: column; justify-content: center; background: #fff; }
+    .login-heading { display: flex; align-items: center; gap: 14px; margin-bottom: 26px; }
+    .login-logo { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 22px; font-weight: 700; background: linear-gradient(135deg, #1f6feb, #60a5fa); box-shadow: 0 8px 18px rgba(31, 111, 235, .28); }
+    .login-heading h2 { margin: 0; font-size: 21px; color: #111827; letter-spacing: .5px; }
+    .login-heading p { margin: 5px 0 0; font-size: 12.5px; color: #8a94a6; }
+    .login-panel .el-form-item { margin-bottom: 18px; }
+    .login-panel .el-form-item__label { color: #4b5563; font-size: 13px; }
+    .login-panel .el-input__wrapper { border-radius: 10px; padding: 4px 12px; box-shadow: 0 0 0 1px #e2e8f0 inset; }
+    .login-panel .el-input__wrapper.is-focus { box-shadow: 0 0 0 1px #1f6feb inset; }
+    .login-panel .el-button { height: 44px; border-radius: 10px; font-size: 15px; font-weight: 600; letter-spacing: 2px; }
+    .login-foot { margin-top: 22px; text-align: center; font-size: 12px; color: #b0b8c6; }
+    @media (max-width: 880px) {
+      .login-intro { display: none; }
+      .login-shell { width: 420px; min-height: auto; }
+      .login-panel { flex: 1; padding: 44px 30px; }
+    }
+
+    .layout { display: flex; min-height: 100vh; }
+    .sidebar { width: 232px; flex: 0 0 232px; background: #101f3c; color: #cbd5e1; display: flex; flex-direction: column; }
+    .sidebar .logo { color: #ffffff; font-size: 18px; font-weight: 700; padding: 24px 20px 18px; letter-spacing: 1px; }
+    .sidebar .logo small { display: block; color: #8fa3c4; font-size: 12px; font-weight: 400; margin-top: 6px; letter-spacing: 0; }
+    .nav { padding: 6px 12px; flex: 1; }
+    .nav-item { padding: 11px 16px; border-radius: 8px; font-size: 14px; cursor: pointer; margin-bottom: 4px; color: #cbd5e1; transition: background .15s, color .15s; }
+    .nav-item:hover { background: rgba(255, 255, 255, 0.08); color: #ffffff; }
+    .nav-item.active { background: #1f6feb; color: #ffffff; font-weight: 600; }
+    .sidebar-footer { padding: 16px 20px 20px; border-top: 1px solid rgba(255, 255, 255, 0.08); font-size: 13px; }
+    .sidebar-footer .name { color: #ffffff; font-weight: 600; margin-bottom: 2px; }
+    .sidebar-footer .role { color: #8fa3c4; margin-bottom: 10px; }
+    .nav-item { display: flex; align-items: center; justify-content: space-between; }
+    .nav-badge { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; background: #ef4444; color: #fff; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; }
+    .todo-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #ef4444; margin-right: 6px; vertical-align: middle; box-shadow: 0 0 0 3px rgba(239, 68, 68, .12); }
+    .star-rating { color: #f59e0b; letter-spacing: 1px; cursor: pointer; font-size: 14px; }
+    .muted { color: #9ca3af; font-size: 13px; }
+    .form-tip { color: #6b7280; font-size: 12px; line-height: 1.6; margin-bottom: 10px; }
+
+    .content { flex: 1; min-width: 0; padding: 24px 28px 48px; }
+    .page-head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 18px; gap: 16px; }
+    .page-head h1 { font-size: 22px; margin: 0; }
+    .page-head .desc { color: #6b7280; font-size: 13px; margin-top: 6px; }
+    .panel { background: #fff; border-radius: 10px; padding: 18px; box-shadow: 0 4px 14px rgba(15, 35, 95, 0.06); }
+    .toolbar { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+
+    .stat-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-bottom: 18px; }
+    .stat-card { background: #fff; border-radius: 10px; padding: 16px 18px; box-shadow: 0 4px 14px rgba(15, 35, 95, 0.06); border-left: 4px solid #1f6feb; }
+    .stat-card .label { color: #6b7280; font-size: 13px; }
+    .stat-card .value { font-size: 28px; font-weight: 700; margin-top: 8px; }
+    .stat-card.warn { border-left-color: #f59e0b; }
+    .stat-card.info { border-left-color: #3b82f6; }
+    .stat-card.purple { border-left-color: #8b5cf6; }
+    .stat-card.cyan { border-left-color: #06b6d4; }
+    .stat-card.success { border-left-color: #10b981; }
+    .stat-card.danger { border-left-color: #ef4444; }
+
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-bottom: 18px; }
+    .section-title { font-size: 15px; font-weight: 600; margin-bottom: 14px; }
+    .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 13px; }
+    .bar-row .bar-name { width: 110px; color: #4b5563; flex: 0 0 110px; }
+    .bar-track { flex: 1; height: 10px; background: #eef2f7; border-radius: 6px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, #60a5fa, #1f6feb); }
+    .bar-row .bar-value { width: 48px; text-align: right; color: #374151; font-weight: 600; }
+    .trend { display: flex; align-items: flex-end; gap: 12px; height: 168px; padding-top: 8px; }
+    .trend-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+    .trend-bar { width: 60%; max-width: 42px; border-radius: 6px 6px 0 0; background: linear-gradient(180deg, #60a5fa, #1f6feb); }
+    .trend-count { font-size: 12px; color: #374151; margin-top: 4px; }
+    .trend-date { font-size: 12px; color: #9ca3af; margin-top: 2px; }
+    .quick-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    .empty-hint { background: #f8fbff; border: 1px solid #dbeafe; border-radius: 8px; padding: 12px 14px; font-size: 13px; color: #1e40af; line-height: 1.7; }
+    .action-hint { background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 10px 12px; font-size: 13px; color: #92400e; margin-bottom: 12px; }
+    .muted { color: #9ca3af; font-size: 12px; }
+    .dialog-scroll { max-height: 62vh; overflow-y: auto; padding-right: 4px; }
+    .role-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+
+    /* 详情弹窗统一视觉：头部摘要 + 分区卡片 + 底部固定操作栏 */
+    .detail-dialog .el-dialog__header { margin-right: 0; padding: 20px 24px 12px; border-bottom: 1px solid #eef2f7; }
+    .detail-dialog .el-dialog__body { padding: 16px 24px 8px; }
+    .detail-dialog .el-dialog__footer { padding: 14px 24px; border-top: 1px solid #eef2f7; background: #fbfcfe; }
+    .detail-dialog .el-dialog__headerbtn { top: 16px; right: 16px; }
+    .detail-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding-right: 28px; }
+    .detail-title { font-size: 18px; font-weight: 700; color: #111827; line-height: 1.4; }
+    .detail-sub { color: #6b7280; font-size: 12px; margin-top: 5px; }
+    .detail-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px 16px; background: #f8fafc; border: 1px solid #eef2f7; border-radius: 10px; padding: 12px 16px; }
+    .summary-item .k { color: #8a94a6; font-size: 12px; margin-bottom: 3px; }
+    .summary-item .v { color: #1f2937; font-size: 13px; font-weight: 600; word-break: break-all; }
+    .detail-section { margin-top: 18px; }
+    .section-head { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: #1f2937; margin-bottom: 10px; }
+    .section-head::before { content: ""; width: 3px; height: 14px; border-radius: 2px; background: #1f6feb; }
+    .section-head .count { color: #8a94a6; font-size: 12px; font-weight: 400; }
+    .content-card { background: #fff; border: 1px solid #eef2f7; border-radius: 10px; padding: 12px 14px; }
+    .description-text { font-size: 13.5px; line-height: 1.8; color: #374151; white-space: pre-wrap; }
+    .ai-card { background: #f8fbff; border: 1px solid #dbeafe; border-radius: 10px; padding: 12px 14px; font-size: 13px; line-height: 1.75; color: #334155; }
+    .ai-card .ai-title { color: #1d4ed8; font-weight: 600; margin-bottom: 6px; }
+    .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+    .photo-grid .el-image, .photo-grid img { width: 100%; height: 96px; border-radius: 8px; border: 1px solid #e5e7eb; cursor: zoom-in; }
+    .timeline-new { position: relative; padding-left: 18px; }
+    .timeline-new::before { content: ""; position: absolute; left: 5px; top: 6px; bottom: 6px; width: 2px; background: #e5edf9; }
+    .timeline-node { position: relative; padding-bottom: 14px; font-size: 13px; }
+    .timeline-node:last-child { padding-bottom: 0; }
+    .timeline-node::before { content: ""; position: absolute; left: -17px; top: 4px; width: 8px; height: 8px; border-radius: 50%; background: #1f6feb; border: 2px solid #fff; box-shadow: 0 0 0 2px #dbeafe; }
+    .node-title { font-weight: 600; color: #1f2937; }
+    .node-meta { color: #8a94a6; font-size: 12px; margin-top: 2px; }
+    .node-remark { color: #4b5563; font-size: 12.5px; margin-top: 3px; line-height: 1.6; }
+    .node-photos { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .node-photos .el-image, .node-photos img { width: 76px; height: 76px; border-radius: 6px; border: 1px solid #e5e7eb; cursor: zoom-in; }
+    .event-photos { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .event-photos .el-image, .event-photos img { width: 96px; height: 96px; border-radius: 6px; border: 1px solid #e5e7eb; cursor: zoom-in; }
+    .action-panel { background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px 16px; }
+    .action-panel .panel-tip { color: #6b7280; font-size: 12px; line-height: 1.6; margin-bottom: 10px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 16px; }
+    .form-grid .span-2 { grid-column: span 2; }
+    .dialog-footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .footer-hint { color: #6b7280; font-size: 12px; line-height: 1.5; }
+    .footer-actions { display: flex; gap: 10px; flex: 0 0 auto; }
+    .acceptance-result { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+    @media (max-width: 900px) {
+      .detail-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-grid .span-2 { grid-column: span 1; }
+    }
+
+    .status-legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: #4b5563; margin-bottom: 10px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+    .map-box { height: 580px; border-radius: 10px; overflow: hidden; }
+    /* 腾讯地图交互层是覆盖整个地图容器的透明 DIV（z-index:1000），按钮层级必须高于它才可点击 */
+    .map-locate-btn { position: absolute; right: 16px; bottom: 20px; z-index: 1200; width: 38px; height: 38px; border-radius: 10px; background: #fff; border: 1px solid #e5e7eb; box-shadow: 0 2px 8px rgba(15, 23, 42, 0.18); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .map-locate-btn:hover { background: #f3f7ff; }
+    .map-locate-btn.locating svg { animation: locate-spin 1s linear infinite; }
+    @keyframes locate-spin { to { transform: rotate(360deg); } }
+    .el-table .cell { word-break: break-word; }
+    @media (max-width: 1200px) {
+      .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div v-if="!token" class="login-wrap">
+    <div class="login-shell">
+      <div class="login-intro">
+        <div class="intro-badge">CITY EVENT PLATFORM</div>
+        <h1>城市事件智能上报<br />与工单调度平台</h1>
+        <p class="intro-sub">居民上报 · AI 研判 · 组长派工 · 两级验收</p>
+        <ul class="intro-points">
+          <li>AI 自动识别事件类型、紧急程度与处置建议</li>
+          <li>管理员派单至组长，组长分配组员并复核结果</li>
+          <li>事件与工单全流程留痕，数据看板实时汇总</li>
+        </ul>
+      </div>
+      <div class="login-panel">
+        <div class="login-heading">
+          <div class="login-logo">城</div>
+          <div>
+            <h2>管理后台登录</h2>
+            <p>请使用管理员账号登录系统</p>
+          </div>
+        </div>
+        <el-form :model="loginForm" label-position="top">
+          <el-form-item label="账号">
+            <el-input v-model="loginForm.username" placeholder="请输入管理员账号" @keyup.enter="login"></el-input>
+          </el-form-item>
+          <el-form-item label="密码">
+            <el-input v-model="loginForm.password" type="password" show-password placeholder="请输入登录密码" @keyup.enter="login"></el-input>
+          </el-form-item>
+          <el-button type="primary" style="width: 100%" :loading="loginLoading" @click="login">登 录</el-button>
+          <div v-if="loginError" style="color: #b91c1c; font-size: 13px; margin-top: 10px">{{ loginError }}</div>
+        </el-form>
+        <div class="login-foot">仅限授权管理员访问</div>
+      </div>
+    </div>
+  </div>
+
+  <div v-else class="layout">
+    <aside class="sidebar">
+      <div class="logo">城市事件管理后台<small>事件审核 · 工单调度 · 数据看板</small></div>
+      <nav class="nav">
+        <div v-for="item in navItems" :key="item.key" class="nav-item" :class="{ active: view === item.key }" @click="switchView(item.key)">
+          <span>{{ item.label }}</span>
+          <span v-if="navBadge(item.key)" class="nav-badge">{{ navBadge(item.key) }}</span>
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="name">{{ nickname }}</div>
+        <div class="role">{{ role === "ADMIN" ? "系统管理员" : role }}</div>
+        <el-button size="small" style="width: 100%" @click="logout">退出登录</el-button>
+      </div>
+    </aside>
+
+    <main class="content">
+      <div class="page-head">
+        <div>
+          <h1>{{ viewTitle }}</h1>
+          <div class="desc">{{ viewDesc }}</div>
+        </div>
+        <el-button v-if="view !== 'map'" :loading="viewLoading" @click="refreshView">刷新数据</el-button>
+      </div>
+
+      <!-- 数据概览 -->
+      <section v-if="view === 'dashboard'" v-loading="dashboardLoading">
+        <div class="stat-grid">
+          <div class="stat-card info"><div class="label">事件总数</div><div class="value">{{ stat.total || 0 }}</div></div>
+          <div class="stat-card warn"><div class="label">待审核</div><div class="value">{{ stat.pendingReview || 0 }}</div></div>
+          <div class="stat-card purple"><div class="label">处理中（已派单+处理中）</div><div class="value">{{ (stat.dispatched || 0) + (stat.processing || 0) }}</div></div>
+          <div class="stat-card cyan"><div class="label">待验收</div><div class="value">{{ stat.pendingAcceptance || 0 }}</div></div>
+          <div class="stat-card success"><div class="label">已关闭</div><div class="value">{{ stat.closed || 0 }}</div></div>
+          <div class="stat-card danger"><div class="label">已驳回</div><div class="value">{{ stat.rejected || 0 }}</div></div>
+          <div class="stat-card"><div class="label">已撤销</div><div class="value">{{ stat.cancelled || 0 }}</div></div>
+          <div class="stat-card"><div class="label">待处理合计</div><div class="value">{{ (stat.pendingReview || 0) + (stat.dispatched || 0) + (stat.processing || 0) + (stat.pendingAcceptance || 0) }}</div></div>
+        </div>
+
+        <div class="panel" style="margin-bottom: 18px">
+          <div class="section-title">快捷操作</div>
+          <div class="quick-actions">
+            <el-button type="primary" @click="jumpTo('events', 'PENDING_REVIEW')">去审核待办</el-button>
+            <el-button type="warning" @click="jumpTo('workorders', 'PENDING_ACCEPT')">查看待接单工单</el-button>
+            <el-button type="success" @click="jumpTo('workorders', 'PENDING_ACCEPTANCE')">去验收</el-button>
+            <el-button @click="switchView('users')">用户管理</el-button>
+            <el-button @click="switchView('workers')">工人管理</el-button>
+            <el-button @click="switchView('recruitments')">招募管理</el-button>
+            <el-button @click="switchView('map')">地图分布</el-button>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="panel">
+            <div class="section-title">按类别分布</div>
+            <div v-if="categoryStats.length === 0" class="muted">暂无数据</div>
+            <div class="bar-row" v-for="item in categoryStats" :key="item.code">
+              <div class="bar-name">{{ item.name || categoryText(item.code) }}</div>
+              <div class="bar-track"><div class="bar-fill" :style="{ width: barWidth(item.count, categoryStats) }"></div></div>
+              <div class="bar-value">{{ item.count }}</div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="section-title">按区域分布</div>
+            <div v-if="areaStats.length === 0" class="muted">暂无数据</div>
+            <div class="bar-row" v-for="item in areaStats" :key="item.areaCode || item.areaName || 'unknown'">
+              <div class="bar-name">{{ item.areaName || item.areaCode || '未划分区域' }}</div>
+              <div class="bar-track"><div class="bar-fill" :style="{ width: barWidth(item.count, areaStats) }"></div></div>
+              <div class="bar-value">{{ item.count }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="section-title">近 7 日上报趋势</div>
+          <div v-if="trendStats.length === 0" class="muted">暂无数据</div>
+          <div class="trend" v-else>
+            <div class="trend-col" v-for="item in trendStats" :key="item.date">
+              <div class="trend-bar" :style="{ height: trendHeight(item.count) }"></div>
+              <div class="trend-count">{{ item.count }}</div>
+              <div class="trend-date">{{ (item.date || '').slice(5) }}</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 事件审核 -->
+      <section v-if="view === 'events'">
+        <div class="toolbar">
+          <el-select v-model="eventQuery.status" placeholder="全部状态" clearable style="width: 150px" @change="loadEvents(1)">
+            <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
+          </el-select>
+          <el-select v-model="eventQuery.categoryCode" placeholder="全部类别" clearable style="width: 160px" @change="loadEvents(1)">
+            <el-option v-for="item in categoryOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
+          </el-select>
+          <el-input v-model="eventQuery.keyword" placeholder="事件编号/标题/描述" clearable style="width: 220px" @keyup.enter="loadEvents(1)"></el-input>
+          <el-button type="primary" @click="loadEvents(1)">查询</el-button>
+          <el-button @click="resetEventQuery">重置</el-button>
+          <el-button type="success" @click="openReportDialog">代报事件</el-button>
+        </div>
+        <div class="action-hint" v-if="eventQuery.status === 'PENDING_REVIEW' && events.length === 0">
+          当前没有待审核事件。审核操作只对“待审核”状态可见，其它状态请到工单管理中处理。
+        </div>
+        <div class="panel">
+          <el-table :data="events" v-loading="eventsLoading" stripe @sort-change="onEventSortChange">
+            <el-table-column prop="eventNo" label="事件编号" width="170">
+              <template #default="{ row }">
+                <span v-if="row.pending" class="todo-dot" title="待审核"></span>{{ row.eventNo }}
+              </template>
+            </el-table-column>
+            <el-table-column prop="title" label="标题" min-width="160" show-overflow-tooltip></el-table-column>
+            <el-table-column label="类别" width="100">
+              <template #default="{ row }">{{ categoryText(row.categoryCode) }}</template>
+            </el-table-column>
+            <el-table-column prop="priority" label="优先级" width="130" sortable="custom" :sort-orders="['descending', 'ascending', null]">
+              <template #default="{ row }">
+                <span>{{ priorityText(row.priority) }}</span>
+                <el-tag v-if="row.aiReviewPriority && row.aiReviewPriority !== row.priority" size="small"
+                        :type="priorityTagType(row.aiReviewPriority)" style="margin-left: 4px">
+                  AI
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column label="状态" width="100">
+              <template #default="{ row }">
+                <el-tag :type="statusTagType(row.status)">{{ statusText(row.status) }}</el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column label="居民评价" width="120">
+              <template #default="{ row }">
+                <el-tooltip v-if="row.rating" placement="top" :show-after="150">
+                  <template #content>
+                    <div style="max-width: 300px; line-height: 1.7">
+                      <div>{{ starText(row.rating) }}（{{ row.rating }} 星）</div>
+                      <div v-if="row.ratingTags">标签：{{ row.ratingTags }}</div>
+                      <div>{{ row.ratingComment || '居民未填写评价内容' }}</div>
+                      <div v-if="row.leaderName" style="color: #cbd5e1; margin-top: 4px">责任组长：{{ row.leaderName }}</div>
+                    </div>
+                  </template>
+                  <span class="star-rating">{{ starText(row.rating) }}</span>
+                </el-tooltip>
+                <span v-else class="muted">—</span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="address" label="地址" min-width="140" show-overflow-tooltip></el-table-column>
+            <el-table-column label="上报时间" width="140">
+              <template #default="{ row }">{{ timeText(row.createTime) }}</template>
+            </el-table-column>
+            <el-table-column label="操作" width="205" fixed="right">
+              <template #default="{ row }">
+                <el-button link type="primary" @click="openDetail(row)">详情</el-button>
+                <el-button v-if="row.status === 'PENDING_REVIEW'" link type="warning" @click="openAudit(row)">审核</el-button>
+                <el-button v-else link @click="openEventWorkOrder(row)">工单</el-button>
+                <el-button v-if="row.status === 'PENDING_REVIEW'" link @click="openEditEvent(row)">编辑</el-button>
+                <el-button v-if="canDeleteEvent(row)" link type="danger" @click="deleteEvent(row)">删除</el-button>
+                <el-button v-if="row.rating && row.rating <= 3" link type="danger" @click="remindLeader(row)">提醒</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+          <div style="display: flex; justify-content: flex-end; margin-top: 14px">
+            <el-pagination background layout="total, prev, pager, next" :total="eventTotal"
+                           :page-size="eventQuery.size" :current-page="eventQuery.page"
+                           @current-change="loadEvents"></el-pagination>
+          </div>
+        </div>
+      </section>
+
+      <!-- 代报事件 -->
+      <el-dialog v-model="reportVisible" title="代报事件" width="640px">
+        <div class="form-tip">
+          管理员代居民录入事件，提交后与居民上报走同一套 AI 研判与自动分流：紧急且片区有在岗组长时会直接派单，其余进入待审核。
+        </div>
+        <el-form :model="reportForm" label-position="top">
+          <div class="form-grid">
+            <el-form-item label="所在城区">
+              <el-select v-model="reportForm.areaCode" style="width: 100%" @change="onReportAreaChange">
+                <el-option v-for="item in fuzhouAreas" :key="item.code" :label="item.name" :value="item.code"></el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="事件类别">
+              <el-select v-model="reportForm.categoryCode" style="width: 100%">
+                <el-option v-for="item in categoryOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="优先级">
+              <el-select v-model="reportForm.priority" style="width: 100%">
+                <el-option v-for="item in priorityOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="详细地址">
+              <el-input v-model="reportForm.address" placeholder="如：五四路与湖东路交叉口"></el-input>
+            </el-form-item>
+            <el-form-item label="标题（可选，留空自动生成）" class="span-2">
+              <el-input v-model="reportForm.title" maxlength="60"></el-input>
+            </el-form-item>
+            <el-form-item label="事件描述" class="span-2">
+              <el-input v-model="reportForm.description" type="textarea" :rows="3" placeholder="不少于 10 字"></el-input>
+            </el-form-item>
+          </div>
+          <div v-if="reportError" style="color: #b91c1c; font-size: 13px">{{ reportError }}</div>
+        </el-form>
+        <template #footer>
+          <el-button @click="reportVisible = false">取消</el-button>
+          <el-button type="primary" :loading="reportLoading" @click="submitReport">提交代报</el-button>
+        </template>
+      </el-dialog>
+
+      <!-- 编辑事件 -->
+      <el-dialog v-model="editVisible" title="编辑事件信息" width="600px">
+        <div class="form-tip">仅待审核事件可编辑，修改会写入事件操作流水。</div>
+        <el-form :model="editForm" label-position="top">
+          <div class="form-grid">
+            <el-form-item label="标题" class="span-2">
+              <el-input v-model="editForm.title" maxlength="100"></el-input>
+            </el-form-item>
+            <el-form-item label="事件类别">
+              <el-select v-model="editForm.categoryCode" style="width: 100%">
+                <el-option v-for="item in categoryOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="优先级">
+              <el-select v-model="editForm.priority" style="width: 100%">
+                <el-option v-for="item in priorityOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="地址" class="span-2">
+              <el-input v-model="editForm.address"></el-input>
+            </el-form-item>
+            <el-form-item label="事件描述" class="span-2">
+              <el-input v-model="editForm.description" type="textarea" :rows="3"></el-input>
+            </el-form-item>
+          </div>
+          <div v-if="editError" style="color: #b91c1c; font-size: 13px">{{ editError }}</div>
+        </el-form>
+        <template #footer>
+          <el-button @click="editVisible = false">取消</el-button>
+          <el-button type="primary" :loading="editLoading" @click="submitEdit">保存</el-button>
+        </template>
+      </el-dialog>
+
+      <!-- 工单管理 -->
+      <section v-if="view === 'workorders'">
+        <div class="toolbar">
+          <el-select v-model="workOrderQuery.status" placeholder="全部状态" clearable style="width: 160px" @change="loadWorkOrders(1)">
+            <el-option v-for="item in workOrderStatusOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
+          </el-select>
+          <el-input v-model="workOrderQuery.eventNo" placeholder="事件编号" clearable style="width: 200px" @keyup.enter="loadWorkOrders(1)"></el-input>
+          <el-button type="primary" @click="loadWorkOrders(1)">查询</el-button>
+          <el-button @click="loadWorkOrders(1)">刷新</el-button>
+        </div>
+        <div class="action-hint" v-if="workOrderQuery.status === 'PENDING_ACCEPTANCE' && workOrders.length === 0">
+          当前没有待验收工单。验收操作只对“待验收”状态可见；待接单/处理中的工单可改派。
+        </div>
+        <div class="panel">
+          <el-table :data="workOrders" v-loading="workOrdersLoading" stripe @sort-change="onWorkOrderSortChange">
+            <el-table-column prop="workOrderNo" label="工单编号" width="168"></el-table-column>
+            <el-table-column prop="eventNo" label="事件编号" width="168"></el-table-column>
+            <el-table-column prop="assigneeName" label="处理人" width="110"></el-table-column>
+            <el-table-column label="责任组长" width="110">
+              <template #default="{ row }">{{ row.leaderName || '-' }}</template>
+            </el-table-column>
+            <el-table-column prop="priority" label="优先级" width="110" sortable="custom" :sort-orders="['descending', 'ascending', null]">
+              <template #default="{ row }">{{ priorityText(row.priority) }}</template>
+            </el-table-column>
+            <el-table-column label="状态" width="130">
+              <template #default="{ row }">
+                <span v-if="row.status === 'PENDING_ACCEPTANCE'" class="todo-dot" title="待验收"></span>
+                <el-tag :type="workOrderTagType(row.status)">{{ workOrderStatusText(row.status) }}</el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column label="派单时间" width="160">
+              <template #default="{ row }">{{ timeText(row.assignTime) }}</template>
+            </el-table-column>
+            <el-table-column label="操作" width="200" fixed="right">
+              <template #default="{ row }">
+                <el-button link type="primary" @click="openWorkOrder(row)">查看/处理</el-button>
+                <el-button v-if="row.status === 'PENDING_ACCEPT'" link type="danger" @click="deleteWorkOrder(row)">删除</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+          <div style="display: flex; justify-content: flex-end; margin-top: 14px">
+            <el-pagination background layout="total, prev, pager, next" :total="workOrderTotal"
+                           :page-size="workOrderQuery.size" :current-page="workOrderQuery.page"
+                           @current-change="loadWorkOrders"></el-pagination>
+          </div>
+        </div>
+      </section>
+
+      <!-- 用户管理 -->
+      <section v-if="view === 'users'">
+        <div class="toolbar">
+          <el-select v-model="userQuery.role" placeholder="全部角色" clearable style="width: 140px" @change="loadUsers(1)">
+            <el-option v-for="item in roleOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
+          </el-select>
+          <el-select v-model="userQuery.status" placeholder="全部状态" clearable style="width: 140px" @change="loadUsers(1)">
+            <el-option label="启用" value="ENABLED"></el-option>
+            <el-option label="禁用" value="DISABLED"></el-option>
+          </el-select>
+          <el-input v-model="userQuery.keyword" placeholder="用户名/昵称/手机号" clearable style="width: 220px" @keyup.enter="loadUsers(1)"></el-input>
+          <el-button type="primary" @click="loadUsers(1)">查询</el-button>
+        </div>
+        <div class="panel">
+          <el-table :data="users" v-loading="usersLoading" stripe>
+            <el-table-column prop="id" label="ID" width="70"></el-table-column>
+            <el-table-column prop="username" label="登录账号" width="160">
+              <template #default="{ row }">{{ row.username || '微信用户' }}</template>
+            </el-table-column>
+            <el-table-column prop="nickname" label="昵称" min-width="120"></el-table-column>
+            <el-table-column prop="phone" label="手机号" width="130"></el-table-column>
+            <el-table-column label="角色" min-width="160">
+              <template #default="{ row }">
+                <div class="role-tags">
+                  <el-tag v-for="roleCode in (row.roles || [])" :key="roleCode" size="small" :type="roleCode === 'ADMIN' ? 'danger' : roleCode === 'WORKER' ? 'warning' : ''">
+                    {{ roleText(roleCode) }}
+                  </el-tag>
+                  <span v-if="!row.roles || row.roles.length === 0" class="muted">未分配</span>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column label="账号状态" width="110">
+              <template #default="{ row }">
+                <el-tag :type="row.status === 'ENABLED' ? 'success' : 'info'" size="small">{{ userStatusText(row.status) }}</el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column label="注册时间" width="160">
+              <template #default="{ row }">{{ timeText(row.createTime) }}</template>
+            </el-table-column>
+            <el-table-column label="操作" width="220" fixed="right">
+              <template #default="{ row }">
+                <el-button link type="warning" @click="openRoleDialog(row)">角色</el-button>
+                <el-button link type="primary" @click="openResetDialog(row)">重置密码</el-button>
+                <el-button link :type="row.status === 'ENABLED' ? 'danger' : 'success'" @click="toggleUserStatus(row)">
+                  {{ row.status === "ENABLED" ? "禁用" : "启用" }}
+                </el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+          <div style="display: flex; justify-content: flex-end; margin-top: 14px">
+            <el-pagination background layout="total, prev, pager, next" :total="userTotal"
+                           :page-size="userQuery.size" :current-page="userQuery.page"
+                           @current-change="loadUsers"></el-pagination>
+          </div>
+        </div>
+      </section>
+
+      <!-- 工人管理 -->
+      <section v-if="view === 'workers'">
+        <div class="toolbar">
+          <el-button type="primary" @click="openWorkerDialog()">新增工人</el-button>
+          <el-select v-model="workerTypeFilter" placeholder="全部人员" clearable style="width: 140px">
+            <el-option label="组长" value="LEADER"></el-option>
+            <el-option label="组员" value="MEMBER"></el-option>
+          </el-select>
+          <el-button @click="loadWorkers">刷新</el-button>
+          <span class="muted">管理员把工单派给组长，组长再分配给组员；组员整改完成后由组长复核，组长本人处理完成后由管理员验收。</span>
+        </div>
+        <div class="panel">
+          <el-table :data="filteredWorkers" v-loading="workersLoading" stripe>
+            <el-table-column prop="id" label="用户ID" width="80"></el-table-column>
+            <el-table-column prop="nickname" label="姓名" width="110"></el-table-column>
+            <el-table-column prop="username" label="登录账号" width="140">
+              <template #default="{ row }">{{ row.username || '-' }}</template>
+            </el-table-column>
+            <el-table-column label="角色" width="90">
+              <template #default="{ row }">
+                <el-tag size="small" :type="row.workerType === 'LEADER' ? 'danger' : 'info'">
+                  {{ row.workerType === "LEADER" ? "组长" : "组员" }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column label="所属组长" width="110">
+              <template #default="{ row }">{{ row.leaderName || '-' }}</template>
+            </el-table-column>
+            <el-table-column prop="deptName" label="班组" min-width="130"></el-table-column>
+            <el-table-column label="负责片区" width="110">
+              <template #default="{ row }">{{ row.workZone || '-' }}</template>
+            </el-table-column>
+            <el-table-column label="区划代码" width="100">
+              <template #default="{ row }">{{ row.areaCode || '-' }}</template>
+            </el-table-column>
+            <el-table-column label="在岗状态" width="100">
+              <template #default="{ row }">
+                <el-tag :type="row.status === 'ON_DUTY' ? 'success' : 'info'" size="small">{{ workerStatusText(row.status) }}</el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column label="处理中工单" width="110">
+              <template #default="{ row }">{{ row.onDutyCount || 0 }}</template>
+            </el-table-column>
+            <el-table-column label="操作" width="90" fixed="right">
+              <template #default="{ row }">
+                <el-button link type="primary" @click="openWorkerDialog(row)">编辑</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+      </section>
+
+      <!-- 招募管理 -->
+      <section v-if="view === 'recruitments'">
+        <div class="toolbar">
+          <el-button type="primary" @click="openRecruitmentDialog()">发布招募</el-button>
+          <el-button @click="loadRecruitments">刷新</el-button>
+          <span class="muted">招募中的岗位会展示在居民端首页轮播，居民可查看详情并报名。</span>
+        </div>
+        <div class="panel">
+          <el-table :data="recruitments" v-loading="recruitmentsLoading" stripe>
+            <el-table-column prop="title" label="岗位名称" min-width="180" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="deptName" label="部门" width="130"></el-table-column>
+            <el-table-column label="工作片区" width="120">
+              <template #default="{ row }">{{ row.workZone || '-' }}</template>
+            </el-table-column>
+            <el-table-column prop="headcount" label="招募人数" width="100"></el-table-column>
+            <el-table-column label="截止日期" width="110">
+              <template #default="{ row }">{{ row.deadline || '长期' }}</template>
+            </el-table-column>
+            <el-table-column label="报名人数" width="100">
+              <template #default="{ row }">{{ row.applyCount || 0 }}</template>
+            </el-table-column>
+            <el-table-column label="状态" width="100">
+              <template #default="{ row }">
+                <el-tag :type="row.status === 'OPEN' ? 'success' : 'info'" size="small">
+                  {{ row.status === "OPEN" ? "招募中" : "已下架" }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column label="发布时间" width="160">
+              <template #default="{ row }">{{ timeText(row.createTime) }}</template>
+            </el-table-column>
+            <el-table-column label="操作" width="230" fixed="right">
+              <template #default="{ row }">
+                <el-button link type="primary" @click="openRecruitmentDialog(row)">编辑</el-button>
+                <el-button link type="warning" @click="openApplications(row)">报名</el-button>
+                <el-button link :type="row.status === 'OPEN' ? 'danger' : 'success'" @click="toggleRecruitmentStatus(row)">
+                  {{ row.status === "OPEN" ? "下架" : "重新上架" }}
+                </el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+      </section>
+
+      <!-- 地图分布（v-show 保持地图容器实例不被销毁） -->
+      <section v-show="view === 'map'">
+        <div class="toolbar">
+          <el-select v-model="mapFilter.status" placeholder="全部状态" clearable style="width: 150px">
+            <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
+          </el-select>
+          <el-select v-model="mapFilter.categoryCode" placeholder="全部类别" clearable style="width: 160px">
+            <el-option v-for="item in categoryOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
+          </el-select>
+          <el-button type="primary" @click="loadMapPoints">刷新点位</el-button>
+          <span class="muted">底图为腾讯地图（JSAPI GL，GCJ-02 坐标，Key 由后端下发）；缩小时同区域事件自动聚合</span>
+        </div>
+        <div class="status-legend">
+          <span v-for="item in statusOptions" :key="item.value">
+            <i class="dot" :style="{ background: statusColor(item.value) }"></i>{{ item.label }}
+          </span>
+        </div>
+        <div class="panel" style="padding: 0; position: relative">
+          <div id="map" class="map-box"></div>
+          <button class="map-locate-btn" :class="{ locating }" title="定位到我的位置" @click="locateMe()">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#1f6feb" stroke-width="2" stroke-linecap="round">
+              <circle cx="12" cy="12" r="3.5"></circle>
+              <path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path>
+            </svg>
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <!-- 事件详情/审核 -->
+    <el-dialog v-model="detailVisible" width="880px" top="5vh" class="detail-dialog" :close-on-click-modal="false">
+      <template #header>
+        <div class="detail-head" v-if="current">
+          <div>
+            <div class="detail-title">{{ current.title }}</div>
+            <div class="detail-sub">{{ current.eventNo }} · 上报于 {{ timeText(current.createTime) }}</div>
+          </div>
+          <el-tag :type="statusTagType(current.status)">{{ statusText(current.status) }}</el-tag>
+        </div>
+      </template>
+      <div v-if="current" class="dialog-scroll">
+        <div class="detail-summary">
+          <div class="summary-item"><div class="k">事件类别</div><div class="v">{{ categoryText(current.categoryCode) }}</div></div>
+          <div class="summary-item"><div class="k">优先级</div><div class="v">{{ priorityText(current.priority) }}</div></div>
+          <div class="summary-item" style="grid-column: span 2"><div class="k">事发位置</div><div class="v">{{ current.address || '-' }}</div></div>
+          <div class="summary-item" style="grid-column: span 2"><div class="k">坐标</div><div class="v">{{ current.longitude }}, {{ current.latitude }}</div></div>
+          <div class="summary-item"><div class="k">上报人 ID</div><div class="v">{{ current.reporterId }}</div></div>
+          <div class="summary-item"><div class="k">照片</div><div class="v">{{ (current.attachments || []).length }} 张</div></div>
+        </div>
+
+        <div class="detail-section">
+          <div class="section-head">事件描述</div>
+          <div class="content-card">
+            <div class="description-text">{{ current.description }}</div>
+            <div v-if="current.rejectReason" class="action-hint" style="margin: 12px 0 0">驳回原因：{{ current.rejectReason }}</div>
+          </div>
+        </div>
+
+        <div class="detail-section" v-if="current.aiSnapshot">
+          <div class="section-head">AI 建议 <span class="count">仅供参考，不决定审核结果</span></div>
+          <div class="ai-card">
+            <div class="ai-title">
+              {{ categoryText(current.aiSnapshot.categoryCode) }}｜{{ priorityText(current.aiSnapshot.priority) }}｜置信度 {{ current.aiSnapshot.confidence }}
+            </div>
+            <div v-if="current.aiSnapshot.summary">摘要：{{ current.aiSnapshot.summary }}</div>
+            <div v-if="current.aiSnapshot.suggestion">建议措施：{{ current.aiSnapshot.suggestion }}</div>
+          </div>
+        </div>
+
+        <div class="detail-section" v-if="(current.attachments || []).length">
+          <div class="section-head">现场照片 <span class="count">{{ current.attachments.length }} 张</span></div>
+          <div class="photo-grid">
+            <el-image v-for="(photo, index) in current.attachments" :key="photo.id"
+                      :src="mediaBase + photo.accessUrl" fit="cover"
+                      :preview-src-list="eventPhotoUrls" :initial-index="index" preview-teleported></el-image>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <div class="section-head">处理进度</div>
+          <div class="content-card">
+            <div class="timeline-new">
+              <div class="timeline-node" v-for="(item, index) in (current.timeline || [])" :key="index">
+                <div class="node-title">{{ eventActionText(item.action) }}</div>
+                <div class="node-meta">{{ statusText(item.fromStatus) }} → {{ statusText(item.toStatus) }}｜{{ timeText(item.createTime) }}</div>
+                <div class="node-remark" v-if="item.remark">{{ item.remark }}</div>
+              </div>
+              <div v-if="!(current.timeline || []).length" class="muted">暂无处理记录</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section" v-if="current.status === 'PENDING_REVIEW'">
+          <div class="section-head">
+            AI 紧急度复评
+            <span class="count">仅供参考，可手动重评</span>
+            <el-button v-if="current.aiReviewPriority" link type="primary" size="small" style="margin-left: auto"
+                       @click="applyAiPriority">采纳 AI 等级</el-button>
+          </div>
+          <div class="ai-card" v-if="current.aiReviewPriority">
+            <div class="ai-title">
+              居民自选 {{ priorityText(current.priority) }} → AI 复评
+              <el-tag size="small" :type="priorityTagType(current.aiReviewPriority)" style="margin-left: 4px">
+                {{ priorityText(current.aiReviewPriority) }}
+              </el-tag>
+              <span class="muted" style="font-weight: 400">｜置信度 {{ current.aiReviewConfidence }}</span>
+            </div>
+            <div v-if="current.aiReviewImpact">影响范围：{{ current.aiReviewImpact }}</div>
+            <div v-if="current.aiReviewReason">判断依据：{{ current.aiReviewReason }}</div>
+            <div v-if="current.aiReviewResponseMinutes" class="muted">建议响应时限：{{ current.aiReviewResponseMinutes }} 分钟</div>
+          </div>
+          <div class="ai-card" v-else>
+            <div class="muted">{{ aiReviewPlaceholder }}</div>
+          </div>
+        </div>
+
+        <div class="detail-section" v-if="current.status === 'PENDING_REVIEW'">
+          <div class="section-head">
+            审核操作
+            <el-button link type="primary" size="small" style="margin-left: auto" :loading="aiReviewLoading"
+                       @click="aiReviewEvent">重新 AI 评估</el-button>
+          </div>
+          <div class="action-panel">
+            <div class="panel-tip" v-if="!assignableWorkers.length">当前没有在岗组长，请先到「工人管理」新增组长或恢复在岗后再派单。</div>
+            <div class="panel-tip" v-else-if="current && !auditForm.areaCode">事件缺少片区信息，已按在办工单与距离推荐组长，可补充所属区域后重新匹配。</div>
+            <el-form :model="auditForm" label-position="top">
+              <div class="form-grid">
+                <el-form-item label="责任组长">
+                  <el-select v-model="auditForm.workerId" placeholder="选择责任组长（已按推荐排序）" style="width: 100%" :disabled="!assignableWorkers.length">
+                    <el-option v-for="item in auditLeaderOptions" :key="item.id"
+                               :label="item.label" :value="item.id"></el-option>
+                  </el-select>
+                </el-form-item>
+                <el-form-item label="所属区域">
+                  <el-input v-model="auditForm.areaCode" placeholder="六城区之一，如 350102" @change="onAuditAreaChange"></el-input>
+                </el-form-item>
+                <el-form-item label="事件类别">
+                  <el-select v-model="auditForm.categoryCode" style="width: 100%">
+                    <el-option v-for="item in categoryOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                  </el-select>
+                </el-form-item>
+                <el-form-item label="优先级">
+                  <el-select v-model="auditForm.priority" style="width: 100%">
+                    <el-option v-for="item in priorityOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                  </el-select>
+                </el-form-item>
+                <el-form-item label="审核备注 / 驳回原因" class="span-2">
+                  <el-input v-model="auditForm.remark" type="textarea" :rows="2" placeholder="通过时选填；驳回时必填且不少于 5 字"></el-input>
+                </el-form-item>
+              </div>
+            </el-form>
+            <div v-if="auditError" style="color: #b91c1c; font-size: 13px">{{ auditError }}</div>
+          </div>
+        </div>
+        <div v-else class="detail-section">
+          <div class="empty-hint">
+            当前状态为“{{ statusText(current.status) }}”，无需审核。可前往「工单管理」查看对应工单的处理与验收进度。
+          </div>
+        </div>
+      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <div class="footer-hint">{{ auditFooterHint }}</div>
+          <div class="footer-actions">
+            <el-button @click="detailVisible = false">关闭</el-button>
+            <template v-if="current && current.status === 'PENDING_REVIEW'">
+              <el-button type="danger" plain :loading="auditLoading" @click="reject">驳回</el-button>
+              <el-button type="primary" :loading="auditLoading" :disabled="!auditForm.workerId" @click="approve">审核通过并派单</el-button>
+            </template>
+          </div>
+        </div>
+      </template>
+    </el-dialog>
+
+    <!-- 工单详情/验收 -->
+    <el-dialog v-model="workOrderVisible" width="860px" top="5vh" class="detail-dialog" :close-on-click-modal="false">
+      <template #header>
+        <div class="detail-head" v-if="currentWorkOrder">
+          <div>
+            <div class="detail-title">{{ currentWorkOrder.workOrderNo }}</div>
+            <div class="detail-sub">关联事件 {{ currentWorkOrder.eventNo }} · 处理人 {{ currentWorkOrder.assigneeName }}</div>
+          </div>
+          <el-tag :type="workOrderTagType(currentWorkOrder.status)">{{ workOrderStatusText(currentWorkOrder.status) }}</el-tag>
+        </div>
+      </template>
+      <div v-if="currentWorkOrder" class="dialog-scroll">
+        <div class="detail-summary">
+          <div class="summary-item"><div class="k">处理人</div><div class="v">{{ currentWorkOrder.assigneeName }}</div></div>
+          <div class="summary-item"><div class="k">责任组长</div><div class="v">{{ currentWorkOrder.leaderName || '-' }}</div></div>
+          <div class="summary-item"><div class="k">所属班组</div><div class="v">{{ deptText(currentWorkOrder.deptCode) }}</div></div>
+          <div class="summary-item"><div class="k">优先级</div><div class="v">{{ priorityText(currentWorkOrder.priority) }}</div></div>
+          <div class="summary-item"><div class="k">派单时间</div><div class="v">{{ timeText(currentWorkOrder.assignTime) }}</div></div>
+          <div class="summary-item"><div class="k">退回次数</div><div class="v">{{ currentWorkOrder.returnCount || 0 }}</div></div>
+          <div class="summary-item"><div class="k">改派次数</div><div class="v">{{ currentWorkOrder.reassignCount || 0 }}</div></div>
+          <div class="summary-item"><div class="k">接单时间</div><div class="v">{{ timeText(currentWorkOrder.acceptTime) }}</div></div>
+          <div class="summary-item"><div class="k">提交时间</div><div class="v">{{ timeText(currentWorkOrder.submitTime) }}</div></div>
+        </div>
+
+        <div class="detail-section" v-if="currentWorkOrder.event">
+          <div class="section-head">关联事件</div>
+          <div class="content-card">
+            <div style="font-weight: 600; font-size: 13.5px">{{ currentWorkOrder.event.title }}</div>
+            <div class="muted" style="margin-top: 4px">{{ currentWorkOrder.event.address }}</div>
+            <div class="description-text" style="margin-top: 8px">{{ currentWorkOrder.event.description }}</div>
+            <div class="muted" style="margin-top: 12px; font-weight: 600">居民上报原图</div>
+            <div class="event-photos" v-if="currentWorkOrder.eventPhotos && currentWorkOrder.eventPhotos.length">
+              <el-image v-for="(photo, index) in currentWorkOrder.eventPhotos" :key="photo.id"
+                        :src="mediaBase + photo.accessUrl" fit="cover"
+                        :preview-src-list="eventOriginalPhotoUrls" :initial-index="index" preview-teleported></el-image>
+            </div>
+            <div class="muted" v-else>上报时未上传照片</div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <div class="section-head">处理记录 <span class="count">{{ logRows.length }} 条</span></div>
+          <div class="content-card">
+            <div class="timeline-new">
+              <div class="timeline-node" v-for="(item, index) in logRows" :key="index">
+                <div class="node-title">{{ item.actionText }}</div>
+                <div class="node-meta">{{ item.fromText }} → {{ item.toText }}｜{{ timeText(item.createTime) }}</div>
+                <div class="node-remark" v-if="item.content">{{ item.content }}</div>
+                <div class="node-photos" v-if="item.images && item.images.length">
+                  <el-image v-for="(photo, photoIndex) in item.images" :key="photo.id"
+                            :src="mediaBase + photo.accessUrl" fit="cover"
+                            :preview-src-list="logPhotoUrls(item)" :initial-index="photoIndex" preview-teleported></el-image>
+                </div>
+              </div>
+              <div v-if="!logRows.length" class="muted">暂无处理记录</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section" v-if="currentWorkOrder.aiVerify">
+          <div class="section-head">AI 整改核实 <span class="count">仅供参考，不替代人工验收</span></div>
+          <div class="ai-card">
+            <div class="ai-title">
+              {{ conclusionText(currentWorkOrder.aiVerify.conclusion) }}
+              <span class="muted" style="font-weight: 400">｜置信度 {{ currentWorkOrder.aiVerify.confidence }}</span>
+              <span v-if="currentWorkOrder.aiVerify.degraded" class="muted" style="font-weight: 400">（降级：{{ degradeText(currentWorkOrder.aiVerify.degradeReason) }}）</span>
+            </div>
+            <div v-if="currentWorkOrder.aiVerify.reason">依据：{{ currentWorkOrder.aiVerify.reason }}</div>
+            <div v-if="currentWorkOrder.aiVerify.issues && currentWorkOrder.aiVerify.issues.length" style="margin-top: 4px">
+              <span class="muted">风险点：</span>
+              <div v-for="(issue, index) in currentWorkOrder.aiVerify.issues" :key="index">· {{ issue }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section" v-if="currentWorkOrder.acceptance">
+          <div class="section-head">验收结果</div>
+          <div class="content-card acceptance-result">
+            <el-tag :type="currentWorkOrder.acceptance.result === 'PASS' ? 'success' : 'danger'" size="small">
+              {{ currentWorkOrder.acceptance.result === "PASS" ? "验收通过" : "退回重做" }}
+            </el-tag>
+            <span style="color: #4b5563">{{ currentWorkOrder.acceptance.remark || "未填写验收意见" }}</span>
+            <span class="muted" v-if="currentWorkOrder.acceptance.createTime">{{ timeText(currentWorkOrder.acceptance.createTime) }}</span>
+          </div>
+        </div>
+
+        <div class="detail-section" v-if="currentWorkOrder.leaderReviewRemark || currentWorkOrder.leaderReviewTime">
+          <div class="section-head">组长复核</div>
+          <div class="content-card acceptance-result">
+            <span style="color: #4b5563">{{ currentWorkOrder.leaderReviewRemark || "组长复核通过，已提交管理员验收" }}</span>
+            <span class="muted" v-if="currentWorkOrder.leaderReviewTime">{{ timeText(currentWorkOrder.leaderReviewTime) }}</span>
+          </div>
+        </div>
+
+        <div class="detail-section" v-if="currentWorkOrder.rating">
+          <div class="section-head">居民评价</div>
+          <div class="content-card acceptance-result">
+            <span style="color: #f59e0b; font-size: 16px">{{ ratingStars(currentWorkOrder.rating.rating) }}</span>
+            <span style="color: #4b5563">{{ currentWorkOrder.rating.tags || '' }} {{ currentWorkOrder.rating.comment || '' }}</span>
+            <span class="muted" v-if="currentWorkOrder.rating.createTime">{{ timeText(currentWorkOrder.rating.createTime) }}</span>
+          </div>
+        </div>
+
+        <div class="detail-section" v-if="currentWorkOrder.status === 'PENDING_ACCEPTANCE'">
+          <div class="section-head">验收操作</div>
+          <div class="action-panel">
+            <div class="panel-tip">通过后事件将自动关闭；退回重做时必须填写验收意见，工单会回到处理中状态。</div>
+            <el-input v-model="acceptanceRemark" type="textarea" :rows="3" maxlength="255" show-word-limit placeholder="填写验收意见（退回时必填）"></el-input>
+            <div v-if="acceptanceError" style="color: #b91c1c; font-size: 13px; margin-top: 8px">{{ acceptanceError }}</div>
+          </div>
+        </div>
+        <div class="detail-section" v-else-if="currentWorkOrder.status === 'PENDING_ACCEPT' || currentWorkOrder.status === 'PROCESSING'">
+          <div class="section-head">改派</div>
+          <div class="action-panel">
+            <div class="panel-tip">当前工单尚未提交验收，可改派给其他在岗处理人；改派后工单回到待接单状态并记录改派原因。</div>
+          </div>
+        </div>
+        <div class="detail-section" v-else-if="currentWorkOrder.status === 'PENDING_LEADER_REVIEW'">
+          <div class="empty-hint">组员已提交整改结果，等待责任组长复核。组长复核通过后才会进入管理员验收。</div>
+        </div>
+        <div class="detail-section" v-else-if="currentWorkOrder.status === 'COMPLETED'">
+          <div class="empty-hint">工单已完成验收，事件已关闭。如需继续处理，可在事件审核页查看该事件。</div>
+        </div>
+      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <div class="footer-hint">{{ workOrderFooterHint }}</div>
+          <div class="footer-actions">
+            <el-button @click="workOrderVisible = false">关闭</el-button>
+            <template v-if="currentWorkOrder && currentWorkOrder.status === 'PENDING_ACCEPTANCE'">
+              <el-button :loading="aiVerifyLoading" @click="aiVerify">{{ currentWorkOrder.aiVerify ? "重新 AI 核实" : "AI 核实整改" }}</el-button>
+              <el-button type="danger" plain :loading="acceptanceLoading" @click="acceptance('REJECT')">退回重做</el-button>
+              <el-button type="primary" :loading="acceptanceLoading" @click="acceptance('PASS')">验收通过</el-button>
+            </template>
+            <el-button v-else-if="canReassign" type="primary" @click="openReassignDialog">改派工单</el-button>
+          </div>
+        </div>
+      </template>
+    </el-dialog>
+
+    <!-- 改派 -->
+    <el-dialog v-model="reassignVisible" title="改派工单" width="560px" class="detail-dialog" :close-on-click-modal="false">
+      <div class="action-panel" v-if="currentWorkOrder">
+        <div class="panel-tip">
+          当前处理人：{{ currentWorkOrder.assigneeName }}。改派后工单回到待接单状态，新处理人需重新接单。
+        </div>
+        <el-form label-position="top">
+          <el-form-item label="新处理人">
+            <el-select v-model="reassignForm.assigneeId" placeholder="选择其他在岗处理人" style="width: 100%" :disabled="!reassignCandidates.length">
+              <el-option v-for="worker in reassignCandidates" :key="worker.id" :label="worker.nickname + '（' + (worker.deptName || '未分班组') + '）'" :value="worker.id"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="改派原因">
+            <el-input v-model="reassignForm.reason" type="textarea" :rows="3" maxlength="200" show-word-limit placeholder="不少于 5 字"></el-input>
+          </el-form-item>
+        </el-form>
+        <div v-if="!reassignCandidates.length" class="muted">没有其他在岗处理人可改派，请先维护工人状态。</div>
+        <div v-if="reassignError" style="color: #b91c1c; font-size: 13px">{{ reassignError }}</div>
+      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <div class="footer-hint">改派原因不少于 5 字</div>
+          <div class="footer-actions">
+            <el-button @click="reassignVisible = false">取消</el-button>
+            <el-button type="primary" :loading="reassignLoading" :disabled="!reassignCandidates.length" @click="submitReassign">确认改派</el-button>
+          </div>
+        </div>
+      </template>
+    </el-dialog>
+
+    <!-- 角色分配 -->
+    <el-dialog v-model="roleDialogVisible" title="分配角色" width="480px">
+      <div class="muted" style="margin-bottom: 12px">用户：{{ roleForm.nickname }}（{{ roleForm.username || "微信用户" }}）</div>
+      <el-checkbox-group v-model="roleForm.roles">
+        <el-checkbox v-for="item in roleOptions" :key="item.value" :label="item.value">{{ item.label }}</el-checkbox>
+      </el-checkbox-group>
+      <div class="muted" style="margin-top: 10px">至少保留一个角色；新增 WORKER 角色前请先到工人管理维护档案。</div>
+      <div v-if="roleError" style="color: #b91c1c; font-size: 13px; margin-top: 8px">{{ roleError }}</div>
+      <div style="text-align: right; margin-top: 14px">
+        <el-button @click="roleDialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="roleLoading" @click="saveRoles">保存</el-button>
+      </div>
+    </el-dialog>
+
+    <!-- 重置密码 -->
+    <el-dialog v-model="resetDialogVisible" title="重置密码" width="460px">
+      <div class="muted" style="margin-bottom: 12px">用户：{{ resetForm.nickname }}（{{ resetForm.username }}）</div>
+      <el-input v-model="resetForm.newPassword" type="password" show-password placeholder="新密码 8-32 位"></el-input>
+      <div class="muted" style="margin-top: 8px">重置后请线下告知用户，并要求其尽快修改。</div>
+      <div v-if="resetError" style="color: #b91c1c; font-size: 13px; margin-top: 8px">{{ resetError }}</div>
+      <div style="text-align: right; margin-top: 14px">
+        <el-button @click="resetDialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="resetLoading" @click="saveReset">确认重置</el-button>
+      </div>
+    </el-dialog>
+
+    <!-- 新增/编辑工人 -->
+    <el-dialog v-model="workerDialogVisible" :title="workerForm.id ? '编辑工人' : '新增工人'" width="560px">
+      <el-form label-width="90px">
+        <el-form-item label="人员类型">
+          <el-radio-group v-model="workerForm.workerType">
+            <el-radio label="MEMBER">组员</el-radio>
+            <el-radio label="LEADER">组长</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="所属组长" v-if="workerForm.workerType === 'MEMBER'">
+          <el-select v-model="workerForm.leaderId" placeholder="选择组长" style="width: 100%" clearable>
+            <el-option v-for="leader in leaderCandidates" :key="leader.id"
+                       :label="leader.nickname + '（' + (leader.workZone || leader.deptName || '未分片区') + '）'" :value="leader.id"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="登录账号">
+          <el-input v-model="workerForm.username" :disabled="!!workerForm.id" placeholder="如 worker_facility"></el-input>
+        </el-form-item>
+        <el-form-item label="初始密码" v-if="!workerForm.id">
+          <el-input v-model="workerForm.password" type="password" show-password placeholder="至少 8 位"></el-input>
+        </el-form-item>
+        <el-form-item label="姓名">
+          <el-input v-model="workerForm.nickname" placeholder="如 赵设施"></el-input>
+        </el-form-item>
+        <el-form-item label="手机号">
+          <el-input v-model="workerForm.phone" placeholder="选填"></el-input>
+        </el-form-item>
+        <el-form-item label="班组">
+          <el-select v-model="workerForm.deptCode" style="width: 100%">
+            <el-option v-for="item in deptOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="负责片区">
+          <el-input v-model="workerForm.workZone" placeholder="如 鼓楼区中心片区"></el-input>
+        </el-form-item>
+        <el-form-item label="区划代码">
+          <el-input v-model="workerForm.areaCode" placeholder="六城区之一，如 350102"></el-input>
+        </el-form-item>
+        <el-form-item label="片区中心">
+          <div style="display: flex; gap: 8px; width: 100%">
+            <el-input v-model="workerForm.zoneLng" placeholder="经度，如 119.2965"></el-input>
+            <el-input v-model="workerForm.zoneLat" placeholder="纬度，如 26.0745"></el-input>
+          </div>
+        </el-form-item>
+        <el-form-item label="在岗状态" v-if="workerForm.id">
+          <el-select v-model="workerForm.status" style="width: 100%">
+            <el-option label="在岗" value="ON_DUTY"></el-option>
+            <el-option label="离岗" value="OFF_DUTY"></el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <div class="muted" style="margin-bottom: 8px">组长不能设置所属组长；组员必须选择本班组组长，组员提交的整改结果由组长复核。</div>
+      <div v-if="workerError" style="color: #b91c1c; font-size: 13px; margin-bottom: 8px">{{ workerError }}</div>
+      <div style="text-align: right">
+        <el-button @click="workerDialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="workerLoading" @click="saveWorker">保存</el-button>
+      </div>
+    </el-dialog>
+
+    <!-- 发布/编辑招募 -->
+    <el-dialog v-model="recruitmentDialogVisible" :title="recruitmentForm.id ? '编辑招募岗位' : '发布招募岗位'" width="620px">
+      <el-form label-width="90px">
+        <el-form-item label="岗位名称">
+          <el-input v-model="recruitmentForm.title" maxlength="128" placeholder="如 环卫保洁员"></el-input>
+        </el-form-item>
+        <el-form-item label="所属部门">
+          <el-select v-model="recruitmentForm.deptCode" style="width: 100%">
+            <el-option v-for="item in deptOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="工作片区">
+          <el-input v-model="recruitmentForm.workZone" maxlength="64" placeholder="如 鼓楼区中心片区"></el-input>
+        </el-form-item>
+        <el-form-item label="招募人数">
+          <el-input-number v-model="recruitmentForm.headcount" :min="1" :max="99"></el-input-number>
+        </el-form-item>
+        <el-form-item label="截止日期">
+          <el-date-picker v-model="recruitmentForm.deadline" type="date" value-format="YYYY-MM-DD"
+                          placeholder="不填表示长期有效" style="width: 100%"></el-date-picker>
+        </el-form-item>
+        <el-form-item label="封面图地址">
+          <el-input v-model="recruitmentForm.coverUrl" maxlength="512" placeholder="选填，图片 URL 或 /uploads 路径"></el-input>
+        </el-form-item>
+        <el-form-item label="岗位要求">
+          <el-input v-model="recruitmentForm.requirement" type="textarea" :rows="3" maxlength="500" show-word-limit
+                    placeholder="如 年龄 18-55 岁，能适应户外作业"></el-input>
+        </el-form-item>
+        <el-form-item label="岗位说明">
+          <el-input v-model="recruitmentForm.description" type="textarea" :rows="4" maxlength="1000" show-word-limit
+                    placeholder="工作内容、班次、待遇等说明"></el-input>
+        </el-form-item>
+      </el-form>
+      <div v-if="recruitmentError" style="color: #b91c1c; font-size: 13px; margin-bottom: 8px">{{ recruitmentError }}</div>
+      <div style="text-align: right">
+        <el-button @click="recruitmentDialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="recruitmentLoading" @click="saveRecruitment">保存</el-button>
+      </div>
+    </el-dialog>
+
+    <!-- 报名列表 -->
+    <el-dialog v-model="applyDialogVisible" width="900px" :title="currentRecruitment ? '报名名单 · ' + currentRecruitment.title : '报名名单'">
+      <div v-if="applyError" style="color: #b91c1c; font-size: 13px; margin-bottom: 8px">{{ applyError }}</div>
+      <el-table :data="applyRows" v-loading="applyLoading" stripe>
+        <el-table-column prop="nickname" label="报名人" width="120"></el-table-column>
+        <el-table-column prop="username" label="账号" width="150">
+          <template #default="{ row }">{{ row.username || '微信用户' }}</template>
+        </el-table-column>
+        <el-table-column prop="phone" label="手机号" width="130"></el-table-column>
+        <el-table-column prop="email" label="邮箱" width="190" show-overflow-tooltip></el-table-column>
+        <el-table-column prop="note" label="报名留言" min-width="160" show-overflow-tooltip>
+          <template #default="{ row }">{{ row.note || '-' }}</template>
+        </el-table-column>
+        <el-table-column label="报名时间" width="160">
+          <template #default="{ row }">{{ timeText(row.createTime) }}</template>
+        </el-table-column>
+        <el-table-column label="状态" width="100">
+          <template #default="{ row }">
+            <el-tag size="small" :type="applyStatusTagType(row.status)">{{ applyStatusText(row.status) }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="150" fixed="right">
+          <template #default="{ row }">
+            <el-button link type="success" @click="updateApplyStatus(row, 'ACCEPTED')">录用</el-button>
+            <el-button link type="danger" @click="updateApplyStatus(row, 'REJECTED')">拒绝</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <div v-if="!applyLoading && !applyRows.length" class="muted" style="margin-top: 10px">暂无报名记录</div>
+    </el-dialog>
+  </div>
+</div>
+
+<script src="vendor/vue.global.prod.js"></script>
+<script src="vendor/element-plus.full.min.js"></script>
+<script>
+const BASE = "";
+const MEDIA = "";
+
+const STATUS_OPTIONS = [
+  { value: "PENDING_REVIEW", label: "待审核" },
+  { value: "DISPATCHED", label: "已派单" },
+  { value: "PROCESSING", label: "处理中" },
+  { value: "PENDING_ACCEPTANCE", label: "待验收" },
+  { value: "CLOSED", label: "已关闭" },
+  { value: "REJECTED", label: "已驳回" },
+  { value: "CANCELLED", label: "已撤销" }
+];
+const CATEGORY_OPTIONS = [
+  { value: "ROAD_FACILITY", label: "道路设施" },
+  { value: "PUBLIC_LIGHTING", label: "公共照明" },
+  { value: "ENVIRONMENT_SANITATION", label: "环境卫生" },
+  { value: "PUBLIC_FACILITY", label: "公共设施" },
+  { value: "OTHER", label: "其他" }
+];
+const PRIORITY_OPTIONS = [
+  { value: "LOW", label: "低" },
+  { value: "MEDIUM", label: "中" },
+  { value: "HIGH", label: "高" },
+  { value: "URGENT", label: "紧急" }
+];
+const WORKORDER_STATUS_OPTIONS = [
+  { value: "PENDING_ACCEPT", label: "待接单" },
+  { value: "PROCESSING", label: "处理中" },
+  { value: "PENDING_LEADER_REVIEW", label: "待组长复核" },
+  { value: "PENDING_ACCEPTANCE", label: "待验收" },
+  { value: "COMPLETED", label: "已完成" }
+];
+const ROLE_OPTIONS = [
+  { value: "RESIDENT", label: "居民" },
+  { value: "WORKER", label: "处理人员" },
+  { value: "ADMIN", label: "管理员" }
+];
+const DEPT_OPTIONS = [
+  { value: "ROAD", label: "市政道路班组" },
+  { value: "LIGHTING", label: "路灯照明班组" },
+  { value: "SANITATION", label: "环卫保洁班组" },
+  { value: "FACILITY", label: "公共设施班组" }
+];
+const STATUS_COLOR = {
+  PENDING_REVIEW: "#f59e0b", DISPATCHED: "#3b82f6", PROCESSING: "#8b5cf6",
+  PENDING_ACCEPTANCE: "#06b6d4", CLOSED: "#10b981", REJECTED: "#ef4444", CANCELLED: "#94a3b8"
+};
+// 当前位置图标：像素固定大小，缩放地图时不变形、不遮挡底图
+const LOCATION_ICON = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 26 26">' +
+  '<circle cx="13" cy="13" r="11" fill="#1f6feb" fill-opacity="0.16"/>' +
+  '<circle cx="13" cy="13" r="6" fill="#1f6feb" stroke="#ffffff" stroke-width="3"/>' +
+  '</svg>'
+);
+
+// 事件点位图标：像素尺寸随缩放级别变化，聚合点额外显示数量
+const MARKER_CLUSTER_GRID = 64;
+function markerSizeForZoom(zoom) {
+  if (zoom <= 9) return 12;
+  if (zoom <= 11) return 15;
+  if (zoom <= 13) return 19;
+  if (zoom <= 15) return 23;
+  return 27;
+}
+function markerIcon(color, size, count) {
+  const radius = size / 2 - 1;
+  const text = count
+    ? `<text x="${size / 2}" y="${size / 2}" text-anchor="middle" dominant-baseline="central" font-family="Arial,sans-serif" font-size="${Math.round(size * 0.42)}" font-weight="700" fill="#ffffff">${count > 99 ? "99+" : count}</text>`
+    : "";
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">` +
+    `<circle cx="${size / 2}" cy="${size / 2}" r="${radius}" fill="${color}" stroke="#ffffff" stroke-width="2"/>` +
+    text +
+    "</svg>";
+  return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
+}
+function escapeHtml(value) {
+  return String(value == null ? "" : value).replace(/[&<>"']/g, (ch) => (
+    { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]
+  ));
+}
+// 聚合模型放在 Vue 之外，避免 TMap.LatLng 等实例被响应式代理
+const markerModels = {};
+
+const { createApp, markRaw } = Vue;
+const { ElMessage, ElMessageBox } = ElementPlus;
+
+createApp({
+  data() {
+    return {
+      token: sessionStorage.getItem("admin_token") || "",
+      role: sessionStorage.getItem("admin_role") || "",
+      nickname: sessionStorage.getItem("admin_name") || "",
+      loginForm: { username: "", password: "" },
+      loginLoading: false,
+      loginError: "",
+
+      view: "dashboard",
+      navItems: [
+        { key: "dashboard", label: "数据概览" },
+        { key: "events", label: "事件审核" },
+        { key: "workorders", label: "工单管理" },
+        { key: "users", label: "用户管理" },
+        { key: "workers", label: "工人管理" },
+        { key: "recruitments", label: "招募管理" },
+        { key: "map", label: "地图分布" }
+      ],
+      statusOptions: STATUS_OPTIONS,
+      categoryOptions: CATEGORY_OPTIONS,
+      priorityOptions: PRIORITY_OPTIONS,
+      workOrderStatusOptions: WORKORDER_STATUS_OPTIONS,
+      roleOptions: ROLE_OPTIONS,
+      deptOptions: DEPT_OPTIONS,
+      viewLoading: false,
+
+      stat: {},
+      categoryStats: [],
+      areaStats: [],
+      trendStats: [],
+      dashboardLoading: false,
+
+      events: [],
+      eventsLoading: false,
+      eventTotal: 0,
+      eventQuery: { page: 1, size: 10, status: "", categoryCode: "", keyword: "", sortBy: "", order: "" },
+      workers: [],
+      detailVisible: false,
+      current: null,
+      auditForm: { workerId: null, categoryCode: "", priority: "MEDIUM", areaCode: "", remark: "" },
+      leaderLoads: {},
+      reportVisible: false,
+      reportLoading: false,
+      reportError: "",
+      reportForm: { areaCode: "350102", categoryCode: "ENVIRONMENT_SANITATION", priority: "MEDIUM",
+                    title: "", description: "", address: "", longitude: 119.303, latitude: 26.078 },
+      editVisible: false,
+      editLoading: false,
+      editError: "",
+      editForm: { id: null, title: "", description: "", categoryCode: "", priority: "", address: "", areaCode: "" },
+      fuzhouAreas: [
+        { code: "350102", name: "鼓楼区", lng: 119.303, lat: 26.078 },
+        { code: "350103", name: "台江区", lng: 119.310, lat: 26.058 },
+        { code: "350104", name: "仓山区", lng: 119.273, lat: 26.030 },
+        { code: "350105", name: "马尾区", lng: 119.455, lat: 25.990 },
+        { code: "350111", name: "晋安区", lng: 119.331, lat: 26.089 },
+        { code: "350112", name: "长乐区", lng: 119.515, lat: 25.970 }
+      ],
+      auditLoading: false,
+      auditError: "",
+      aiReviewLoading: false,
+
+      workOrders: [],
+      workOrdersLoading: false,
+      workOrderTotal: 0,
+      workOrderQuery: { page: 1, size: 10, status: "", eventNo: "", sortBy: "", order: "" },
+      workOrderVisible: false,
+      currentWorkOrder: null,
+      logRows: [],
+      acceptanceRemark: "",
+      acceptanceLoading: false,
+      acceptanceError: "",
+      aiVerifyLoading: false,
+      reassignVisible: false,
+      reassignCandidates: [],
+      reassignForm: { assigneeId: null, reason: "" },
+      reassignLoading: false,
+      reassignError: "",
+
+      users: [],
+      usersLoading: false,
+      userTotal: 0,
+      userQuery: { page: 1, size: 10, role: "", status: "", keyword: "" },
+      roleDialogVisible: false,
+      roleForm: { userId: null, username: "", nickname: "", roles: [] },
+      roleLoading: false,
+      roleError: "",
+      resetDialogVisible: false,
+      resetForm: { userId: null, username: "", nickname: "", newPassword: "" },
+      resetLoading: false,
+      resetError: "",
+
+      workersLoading: false,
+      workerTypeFilter: "",
+      workerDialogVisible: false,
+      workerForm: { id: null, username: "", password: "", nickname: "", phone: "", deptCode: "ROAD", areaCode: "", status: "ON_DUTY", workerType: "MEMBER", leaderId: null, workZone: "", zoneLng: "", zoneLat: "" },
+      workerLoading: false,
+      workerError: "",
+
+      recruitments: [],
+      recruitmentsLoading: false,
+      recruitmentDialogVisible: false,
+      recruitmentForm: { id: null, title: "", deptCode: "ROAD", workZone: "", headcount: 1, requirement: "", description: "", deadline: "", coverUrl: "" },
+      recruitmentLoading: false,
+      recruitmentError: "",
+      applyDialogVisible: false,
+      applyRows: [],
+      applyLoading: false,
+      applyError: "",
+      currentRecruitment: null,
+
+      mapFilter: { status: "", categoryCode: "" },
+      map: null,
+      markerLayer: null,
+      locationMarker: null,
+      mapPoints: [],
+      infoWindow: null,
+      locating: false,
+      autoLocateTried: false,
+      mediaBase: MEDIA
+    };
+  },
+  computed: {
+    viewTitle() {
+      const map = { dashboard: "数据概览", events: "事件审核", workorders: "工单管理", users: "用户管理", workers: "工人管理", recruitments: "招募管理", map: "地图分布" };
+      return map[this.view] || "";
+    },
+    viewDesc() {
+      const map = {
+        dashboard: "事件、工单与人员数据总览，快速进入待办事项",
+        events: "按状态筛选事件，对“待审核”事件执行通过派单或驳回",
+        workorders: "查看工单处理进度，对待验收工单验收，对待接单/处理中工单改派",
+        users: "查看全部账号，调整角色、启停账号或重置密码",
+        workers: "维护工人账号、组长与组员关系、负责片区与在岗状态",
+        recruitments: "发布招募岗位并查看居民报名，公告展示在居民端首页轮播",
+        map: "按状态与类别查看事件空间分布，同区域事件自动聚合"
+      };
+      return map[this.view] || "";
+    },
+    assignableWorkers() {
+      // 管理员只派给组长，由组长再分配给组员
+      return (this.workers || [])
+        .filter((worker) => worker.status !== "OFF_DUTY" && worker.workerType === "LEADER");
+    },
+    auditLeaderOptions() {
+      // 推荐排序：同片区优先 -> 在办工单少优先 -> 距离事件更近优先
+      const event = this.current || {};
+      const areaCode = String(this.auditForm.areaCode || event.areaCode || "").trim();
+      const lng = Number(event.longitude);
+      const lat = Number(event.latitude);
+      const eventLocated = Number.isFinite(lng) && Number.isFinite(lat) && lng !== 0 && lat !== 0;
+      const loads = this.leaderLoads || {};
+      const options = this.assignableWorkers.map((worker) => {
+        const hasZone = worker.zoneLng !== null && worker.zoneLng !== undefined && worker.zoneLng !== ""
+          && worker.zoneLat !== null && worker.zoneLat !== undefined && worker.zoneLat !== "";
+        const distance = eventLocated && hasZone
+          ? this.distanceKm(lng, lat, Number(worker.zoneLng), Number(worker.zoneLat)) : null;
+        return {
+          worker,
+          sameArea: !!areaCode && String(worker.areaCode || "") === areaCode,
+          distance,
+          activeCount: Number(loads[worker.id] || 0)
+        };
+      });
+      options.sort((a, b) => {
+        // 有片区时：片区 -> 在办工单 -> 距离；缺片区时退化为：距离 -> 在办工单
+        if (areaCode && a.sameArea !== b.sameArea) return a.sameArea ? -1 : 1;
+        if (areaCode && a.activeCount !== b.activeCount) return a.activeCount - b.activeCount;
+        const da = a.distance === null ? Number.MAX_SAFE_INTEGER : a.distance;
+        const db = b.distance === null ? Number.MAX_SAFE_INTEGER : b.distance;
+        if (!areaCode && da !== db) return da - db;
+        if (!areaCode && a.activeCount !== b.activeCount) return a.activeCount - b.activeCount;
+        return da - db;
+      });
+      return options.map((item, index) => {
+        const recommended = index === 0 && (item.sameArea || item.distance !== null);
+        const zone = item.worker.workZone || item.worker.deptName || "未分片区";
+        const distanceText = item.distance === null ? "" : `，距事件 ${item.distance.toFixed(1)} km`;
+        return {
+          id: item.worker.id,
+          recommended,
+          label: `${item.worker.nickname}（${zone}，在办 ${item.activeCount} 单${distanceText}）${recommended ? " · 推荐" : ""}`
+        };
+      });
+    },
+    filteredWorkers() {
+      if (!this.workerTypeFilter) return this.workers || [];
+      return (this.workers || []).filter((worker) => (worker.workerType || "MEMBER") === this.workerTypeFilter);
+    },
+    leaderCandidates() {
+      const selfId = this.workerForm.id;
+      return (this.workers || []).filter((worker) => (
+        worker.workerType === "LEADER" && (!selfId || String(worker.id) !== String(selfId))
+      ));
+    },
+    eventPhotoUrls() {
+      const attachments = this.current && this.current.attachments ? this.current.attachments : [];
+      return attachments.map((photo) => this.mediaBase + photo.accessUrl);
+    },
+    eventOriginalPhotoUrls() {
+      const photos = this.currentWorkOrder && this.currentWorkOrder.eventPhotos
+        ? this.currentWorkOrder.eventPhotos : [];
+      return photos.map((photo) => this.mediaBase + photo.accessUrl);
+    },
+    auditFooterHint() {
+      if (!this.current) return "";
+      if (this.current.status !== "PENDING_REVIEW") {
+        return "当前状态无需审核，可前往工单管理查看处理进度";
+      }
+      if (!this.assignableWorkers.length) {
+        return "暂无在岗组长，无法派单";
+      }
+      if (!this.auditForm.workerId) {
+        return "请选择责任组长后再派单";
+      }
+      const top = this.auditLeaderOptions[0];
+      const picked = this.auditLeaderOptions.find((item) => String(item.id) === String(this.auditForm.workerId));
+      if (top && picked && picked.recommended && String(picked.id) === String(top.id)) {
+        return "已按片区、在办工单与距离推荐责任组长，通过后自动创建工单并派单";
+      }
+      return "通过后将自动创建工单并派单给所选组长，由组长分配给组员";
+    },
+    aiReviewPlaceholder() {
+      if (!this.current) return "";
+      if (this.current.status !== "PENDING_REVIEW") {
+        return "AI 紧急度复评仅在待审核状态下生成";
+      }
+      return "AI 复评结果还未生成（上报后会自动执行），可点击下方「重新 AI 评估」立即生成。";
+    },
+    workOrderFooterHint() {
+      if (!this.currentWorkOrder) return "";
+      if (this.currentWorkOrder.status === "PENDING_ACCEPTANCE") {
+        return "通过后事件将自动关闭；退回需填写验收意见";
+      }
+      if (this.canReassign) {
+        return "可改派给其他在岗处理人，改派后回到待接单";
+      }
+      if (this.currentWorkOrder.status === "COMPLETED") {
+        return "工单已完成验收";
+      }
+      return "";
+    },
+    canReassign() {
+      return !!this.currentWorkOrder
+        && (this.currentWorkOrder.status === "PENDING_ACCEPT" || this.currentWorkOrder.status === "PROCESSING");
+    }
+  },
+  mounted() {
+    if (this.token) {
+      this.bootstrap();
+    }
+  },
+  methods: {
+    async request(path, options = {}) {
+      const response = await fetch(BASE + path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.token}`
+        }
+      });
+      if (response.status === 401) {
+        this.logout();
+        throw new Error("登录已失效");
+      }
+      const body = await response.json();
+      if (!body || body.code !== 0) {
+        throw new Error((body && body.message) || "请求失败");
+      }
+      return body.data;
+    },
+    async login() {
+      const username = (this.loginForm.username || "").trim();
+      const password = this.loginForm.password || "";
+      if (!username || !password) {
+        this.loginError = "请输入账号和密码";
+        return;
+      }
+      this.loginLoading = true;
+      this.loginError = "";
+      try {
+        const data = await this.request("/api/v1/auth/login", {
+          method: "POST",
+          body: JSON.stringify({ username, password, client: "admin-web" })
+        });
+        if (data.activeRole !== "ADMIN") {
+          this.loginError = "该账号没有管理员权限";
+          return;
+        }
+        this.token = data.token;
+        this.role = data.activeRole;
+        this.nickname = data.nickname;
+        sessionStorage.setItem("admin_token", data.token);
+        sessionStorage.setItem("admin_role", data.activeRole);
+        sessionStorage.setItem("admin_name", data.nickname);
+        this.bootstrap();
+      } catch (error) {
+        this.loginError = error.message;
+      } finally {
+        this.loginLoading = false;
+      }
+    },
+    logout() {
+      this.token = "";
+      sessionStorage.clear();
+      this.current = null;
+    },
+    async bootstrap() {
+      await Promise.all([this.loadDashboard(), this.loadWorkers()]);
+    },
+    switchView(view) {
+      this.view = view;
+      if (view === "dashboard") this.loadDashboard();
+      if (view === "events") this.loadEvents(1);
+      if (view === "workorders") this.loadWorkOrders(1);
+      if (view === "users") this.loadUsers(1);
+      if (view === "workers") this.loadWorkers();
+      if (view === "recruitments") this.loadRecruitments();
+      if (view === "map") {
+        this.$nextTick(() => {
+          if (this.map && typeof this.map.resize === "function") {
+            this.map.resize();
+          }
+          this.loadMapPoints().then(() => {
+            if (!this.autoLocateTried) {
+              this.autoLocateTried = true;
+              this.locateMe(true);
+            }
+          });
+        });
+      }
+    },
+    refreshView() {
+      this.switchView(this.view);
+    },
+    jumpTo(view, status) {
+      if (view === "events") this.eventQuery.status = status || "";
+      if (view === "workorders") this.workOrderQuery.status = status || "";
+      this.switchView(view);
+    },
+    timeText(value) {
+      if (!value) return "-";
+      return String(value).replace("T", " ").slice(0, 19);
+    },
+    categoryText(code) {
+      const item = CATEGORY_OPTIONS.find((option) => option.value === code);
+      return item ? item.label : (code || "-");
+    },
+    priorityText(value) {
+      const item = PRIORITY_OPTIONS.find((option) => option.value === value);
+      return item ? item.label : (value || "-");
+    },
+    priorityTagType(value) {
+      if (value === "URGENT") return "danger";
+      if (value === "HIGH") return "warning";
+      if (value === "MEDIUM") return "primary";
+      return "info";
+    },
+    ratingStars(value) {
+      const rating = Math.max(0, Math.min(5, Number(value) || 0));
+      return "★★★★★".slice(0, rating) + "☆☆☆☆☆".slice(0, 5 - rating);
+    },
+    deptText(code) {
+      const item = DEPT_OPTIONS.find((option) => option.value === code);
+      return item ? item.label : (code || "-");
+    },
+    eventActionText(action) {
+      const map = {
+        CREATE: "居民上报事件",
+        APPROVE: "审核通过并派单",
+        REJECT: "审核驳回",
+        CANCEL: "居民撤销上报",
+        RESUBMIT: "修改后重新提交",
+        MQ_SYNC: "工单状态同步"
+      };
+      return map[action] || action || "-";
+    },
+    workOrderActionText(action) {
+      const map = {
+        CREATE: "创建工单并派单给组长",
+        ASSIGN: "组长分配给组员",
+        ACCEPT: "处理人接单",
+        PROCESS: "追加处理记录",
+        SUBMIT: "提交处理结果",
+        LEADER_PASS: "组长复核通过",
+        LEADER_REJECT: "组长复核退回",
+        ACCEPT_PASS: "管理员验收通过",
+        ACCEPT_REJECT: "管理员验收退回重做",
+        REASSIGN: "改派处理人"
+      };
+      return map[action] || action || "-";
+    },
+    roleText(code) {
+      const item = ROLE_OPTIONS.find((option) => option.value === code);
+      return item ? item.label : code;
+    },
+    userStatusText(status) {
+      return status === "ENABLED" ? "启用" : status === "DISABLED" ? "禁用" : (status || "-");
+    },
+    workerStatusText(status) {
+      return status === "ON_DUTY" ? "在岗" : status === "OFF_DUTY" ? "离岗" : (status || "-");
+    },
+    barWidth(count, list) {
+      const max = Math.max(1, ...(list || []).map((item) => Number(item.count) || 0));
+      return Math.max(4, Math.round((Number(count) || 0) / max * 100)) + "%";
+    },
+    trendHeight(count) {
+      const max = Math.max(1, ...(this.trendStats || []).map((item) => Number(item.count) || 0));
+      return Math.max(6, Math.round((Number(count) || 0) / max * 130)) + "px";
+    },
+
+    async loadDashboard() {
+      this.dashboardLoading = true;
+      try {
+        const [overview, categories, areas, trend] = await Promise.all([
+          this.request("/api/v1/events/statistics/overview"),
+          this.request("/api/v1/events/statistics/by-category"),
+          this.request("/api/v1/events/statistics/by-area"),
+          this.request("/api/v1/events/statistics/trend?days=7")
+        ]);
+        this.stat = overview || {};
+        this.categoryStats = categories || [];
+        this.areaStats = areas || [];
+        this.trendStats = trend || [];
+      } catch (error) {
+        ElMessage.error(error.message);
+      } finally {
+        this.dashboardLoading = false;
+      }
+    },
+
+    async loadEvents(page = 1) {
+      this.eventQuery.page = page;
+      this.eventsLoading = true;
+      try {
+        const query = new URLSearchParams({ page: this.eventQuery.page, size: this.eventQuery.size });
+        if (this.eventQuery.status) query.set("status", this.eventQuery.status);
+        if (this.eventQuery.categoryCode) query.set("categoryCode", this.eventQuery.categoryCode);
+        if (this.eventQuery.keyword) query.set("keyword", this.eventQuery.keyword);
+        if (this.eventQuery.sortBy) {
+          query.set("sortBy", this.eventQuery.sortBy);
+          query.set("order", this.eventQuery.order || "desc");
+        }
+        const data = await this.request(`/api/v1/events?${query.toString()}`);
+        this.events = data.records || [];
+        this.eventTotal = data.total || 0;
+      } catch (error) {
+        ElMessage.error(error.message);
+      } finally {
+        this.eventsLoading = false;
+      }
+    },
+    resetEventQuery() {
+      // 保留当前排序，只清筛选条件
+      this.eventQuery = { ...this.eventQuery, page: 1, status: "", categoryCode: "", keyword: "" };
+      this.loadEvents(1);
+    },
+    onEventSortChange({ prop, order }) {
+      this.eventQuery.sortBy = order && prop === "priority" ? "priority" : "";
+      this.eventQuery.order = order === "ascending" ? "asc" : (order === "descending" ? "desc" : "");
+      this.loadEvents(1);
+    },
+    onWorkOrderSortChange({ prop, order }) {
+      this.workOrderQuery.sortBy = order && prop === "priority" ? "priority" : "";
+      this.workOrderQuery.order = order === "ascending" ? "asc" : (order === "descending" ? "desc" : "");
+      this.loadWorkOrders(1);
+    },
+    async loadWorkers() {
+      this.workersLoading = true;
+      try {
+        this.workers = await this.request("/api/v1/workers");
+      } catch (error) {
+        this.workers = [];
+        ElMessage.error(error.message);
+      } finally {
+        this.workersLoading = false;
+      }
+    },
+    navBadge(key) {
+      if (key === "events") return this.stat.pendingReview || 0;
+      if (key === "workorders") return this.stat.pendingAcceptance || 0;
+      return 0;
+    },
+    starText(rating) {
+      const n = Math.max(0, Math.min(5, Math.round(Number(rating) || 0)));
+      return "★".repeat(n) + "☆".repeat(5 - n);
+    },
+    canDeleteEvent(row) {
+      return ["PENDING_REVIEW", "REJECTED", "CANCELLED"].includes(row.status);
+    },
+    openReportDialog() {
+      this.reportForm = {
+        areaCode: "350102", categoryCode: "ENVIRONMENT_SANITATION", priority: "MEDIUM",
+        title: "", description: "", address: "", longitude: 119.303, latitude: 26.078
+      };
+      this.reportError = "";
+      this.reportVisible = true;
+    },
+    onReportAreaChange(code) {
+      const area = this.fuzhouAreas.find((item) => item.code === code);
+      if (area) {
+        this.reportForm.longitude = area.lng;
+        this.reportForm.latitude = area.lat;
+      }
+    },
+    async submitReport() {
+      const description = (this.reportForm.description || "").trim();
+      const address = (this.reportForm.address || "").trim();
+      if (description.length < 10) {
+        this.reportError = "事件描述不少于 10 个字";
+        return;
+      }
+      if (!address) {
+        this.reportError = "请填写详细地址";
+        return;
+      }
+      this.reportLoading = true;
+      this.reportError = "";
+      try {
+        const area = this.fuzhouAreas.find((item) => item.code === this.reportForm.areaCode);
+        const payload = {
+          ...this.reportForm,
+          description,
+          address: (area ? area.name : "") + address,
+          attachmentIds: []
+        };
+        await this.request("/api/v1/events/admin-report", { method: "POST", body: JSON.stringify(payload) });
+        ElMessage.success("代报成功");
+        this.reportVisible = false;
+        this.loadEvents(1);
+        this.loadDashboard();
+      } catch (error) {
+        this.reportError = error.message;
+      } finally {
+        this.reportLoading = false;
+      }
+    },
+    async openEditEvent(row) {
+      this.editForm = {
+        id: row.id, title: row.title, description: "", categoryCode: row.categoryCode,
+        priority: row.priority, address: row.address, areaCode: ""
+      };
+      this.editError = "";
+      this.editVisible = true;
+      try {
+        const detail = await this.request(`/api/v1/events/${row.id}`);
+        this.editForm.description = detail.description || "";
+        this.editForm.areaCode = detail.areaCode || "";
+        this.editForm.title = detail.title || row.title;
+      } catch (error) {
+        // 详情加载失败时仍可编辑基础字段
+      }
+    },
+    async submitEdit() {
+      this.editLoading = true;
+      this.editError = "";
+      try {
+        const body = {
+          title: this.editForm.title,
+          description: this.editForm.description,
+          categoryCode: this.editForm.categoryCode,
+          priority: this.editForm.priority,
+          address: this.editForm.address,
+          areaCode: this.editForm.areaCode
+        };
+        await this.request(`/api/v1/events/${this.editForm.id}`, { method: "PUT", body: JSON.stringify(body) });
+        ElMessage.success("已保存");
+        this.editVisible = false;
+        this.loadEvents(this.eventQuery.page);
+      } catch (error) {
+        this.editError = error.message;
+      } finally {
+        this.editLoading = false;
+      }
+    },
+    async deleteEvent(row) {
+      try {
+        await ElMessageBox.confirm(`确认删除事件 ${row.eventNo}？删除后不再出现在列表中。`, "删除事件", { type: "warning" });
+      } catch (e) {
+        return;
+      }
+      try {
+        await this.request(`/api/v1/events/${row.id}`, { method: "DELETE" });
+        ElMessage.success("已删除");
+        this.loadEvents(1);
+        this.loadDashboard();
+      } catch (error) {
+        ElMessage.error(error.message);
+      }
+    },
+    async deleteWorkOrder(row) {
+      try {
+        await ElMessageBox.confirm(`确认删除工单 ${row.workOrderNo}？删除后对应事件会退回待审核。`, "删除工单", { type: "warning" });
+      } catch (e) {
+        return;
+      }
+      try {
+        await this.request(`/api/v1/workorders/${row.id}`, { method: "DELETE" });
+        ElMessage.success("已删除，事件已退回待审核");
+        this.loadWorkOrders(1);
+        this.loadEvents(1);
+        this.loadDashboard();
+      } catch (error) {
+        ElMessage.error(error.message);
+      }
+    },
+    async remindLeader(row) {
+      if (!row.leaderName) {
+        ElMessage.warning("该事件暂无责任组长，无法提醒");
+        return;
+      }
+      try {
+        await ElMessageBox.confirm(
+          `提醒责任组长 ${row.leaderName} 跟进「${row.title}」的居民反馈？`,
+          "提醒组长",
+          { type: "warning" }
+        );
+      } catch (e) {
+        return;
+      }
+      try {
+        await this.request("/api/v1/notifications/remind", {
+          method: "POST",
+          body: JSON.stringify({ eventId: row.id })
+        });
+        ElMessage.success("已提醒责任组长");
+      } catch (error) {
+        ElMessage.error(error.message);
+      }
+    },
+    async openDetail(row) {
+      try {
+        this.current = await this.request(`/api/v1/events/${row.id}`);
+        let areaCode = this.current.areaCode || "";
+        if (!areaCode) {
+          // 兼容历史数据：逆地址解析失败时按地址文本里的区名识别片区
+          const matchedArea = this.fuzhouAreas.find((item) => String(this.current.address || "").includes(item.name));
+          if (matchedArea) areaCode = matchedArea.code;
+        }
+        this.auditForm = {
+          workerId: null,
+          categoryCode: this.current.categoryCode,
+          priority: this.current.priority,
+          areaCode,
+          remark: ""
+        };
+        this.leaderLoads = {};
+        if (this.current.status === "PENDING_REVIEW") {
+          const ids = this.assignableWorkers.map((worker) => worker.id).join(",");
+          if (ids) {
+            try {
+              const rows = await this.request(`/api/v1/workorders/loads?ids=${ids}`);
+              const loads = {};
+              (rows || []).forEach((item) => {
+                loads[item.workerId] = Number(item.activeCount || 0);
+              });
+              this.leaderLoads = loads;
+            } catch (e) {
+              // 在办工单统计失败不阻塞推荐，退化为按片区匹配
+            }
+          }
+          const top = this.auditLeaderOptions[0];
+          if (top) {
+            this.auditForm.workerId = top.id;
+          }
+        }
+        this.auditError = "";
+        this.detailVisible = true;
+      } catch (error) {
+        ElMessage.error(error.message);
+      }
+    },
+    onAuditAreaChange() {
+      const top = this.auditLeaderOptions[0];
+      if (top) {
+        this.auditForm.workerId = top.id;
+      }
+    },
+    distanceKm(lng1, lat1, lng2, lat2) {
+      const rad = (value) => (value * Math.PI) / 180;
+      const dLat = rad(lat2 - lat1);
+      const dLng = rad(lng2 - lng1);
+      const a = Math.pow(Math.sin(dLat / 2), 2)
+        + Math.cos(rad(lat1)) * Math.cos(rad(lat2)) * Math.pow(Math.sin(dLng / 2), 2);
+      return 6371 * 2 * Math.asin(Math.sqrt(a));
+    },
+    openAudit(row) {
+      this.openDetail(row);
+    },
+    async openEventWorkOrder(row) {
+      try {
+        const detail = await this.request(`/api/v1/events/${row.id}`);
+        if (detail.workOrder && detail.workOrder.workOrderId) {
+          const target = this.workOrders.find((item) => String(item.id) === String(detail.workOrder.workOrderId))
+            || { id: detail.workOrder.workOrderId };
+          this.switchView("workorders");
+          this.openWorkOrder(target);
+        } else {
+          ElMessage.info("该事件暂未生成工单");
+        }
+      } catch (error) {
+        ElMessage.error(error.message);
+      }
+    },
+    async approve() {
+      if (!this.auditForm.workerId) {
+        this.auditError = "请选择处理人员";
+        return;
+      }
+      const worker = this.assignableWorkers.find((item) => String(item.id) === String(this.auditForm.workerId));
+      try {
+        await ElMessageBox.confirm(
+          `责任组长：${worker ? worker.nickname : "-"}；类别：${this.categoryText(this.auditForm.categoryCode)}；优先级：${this.priorityText(this.auditForm.priority)}。通过后将自动创建工单并派单给该组长。`,
+          "确认审核通过并派单",
+          { type: "warning", confirmButtonText: "确认通过", cancelButtonText: "取消" }
+        );
+      } catch (e) {
+        return;
+      }
+      this.auditLoading = true;
+      this.auditError = "";
+      try {
+        const payload = {
+          ...this.auditForm,
+          areaCode: (this.auditForm.areaCode || "").trim() || undefined
+        };
+        await this.request(`/api/v1/events/${this.current.id}/approve`, {
+          method: "POST",
+          body: JSON.stringify(payload)
+        });
+        ElMessage.success("审核通过并已派单");
+        this.detailVisible = false;
+        this.loadEvents(this.eventQuery.page);
+        this.loadWorkOrders(1);
+        this.loadDashboard();
+      } catch (error) {
+        this.auditError = error.message;
+      } finally {
+        this.auditLoading = false;
+      }
+    },
+    async reject() {
+      if (!this.auditForm.remark || this.auditForm.remark.trim().length < 5) {
+        this.auditError = "驳回原因不少于 5 个字";
+        return;
+      }
+      this.auditLoading = true;
+      this.auditError = "";
+      try {
+        await this.request(`/api/v1/events/${this.current.id}/reject`, {
+          method: "POST",
+          body: JSON.stringify({ reason: this.auditForm.remark })
+        });
+        ElMessage.success("已驳回");
+        this.detailVisible = false;
+        this.loadEvents(this.eventQuery.page);
+      } catch (error) {
+        this.auditError = error.message;
+      } finally {
+        this.auditLoading = false;
+      }
+    },
+
+    async loadWorkOrders(page = 1) {
+      this.workOrderQuery.page = page;
+      this.workOrdersLoading = true;
+      try {
+        const query = new URLSearchParams({ page: this.workOrderQuery.page, size: this.workOrderQuery.size });
+        if (this.workOrderQuery.status) query.set("status", this.workOrderQuery.status);
+        if (this.workOrderQuery.eventNo) query.set("eventNo", this.workOrderQuery.eventNo);
+        if (this.workOrderQuery.sortBy) {
+          query.set("sortBy", this.workOrderQuery.sortBy);
+          query.set("order", this.workOrderQuery.order || "desc");
+        }
+        const data = await this.request(`/api/v1/workorders?${query.toString()}`);
+        this.workOrders = data.records || [];
+        this.workOrderTotal = data.total || 0;
+      } catch (error) {
+        ElMessage.error(error.message);
+      } finally {
+        this.workOrdersLoading = false;
+      }
+    },
+    async openWorkOrder(row) {
+      try {
+        this.currentWorkOrder = await this.request(`/api/v1/workorders/${row.id}`);
+        this.acceptanceRemark = "";
+        this.acceptanceError = "";
+        this.aiVerifyLoading = false;
+        this.logRows = [];
+        this.workOrderVisible = true;
+        this.loadWorkOrderLogs(this.currentWorkOrder);
+      } catch (error) {
+        ElMessage.error(error.message);
+      }
+    },
+    async loadWorkOrderLogs(detail) {
+      const ids = [];
+      (detail.logs || []).forEach((log) => {
+        String(log.attachmentIds || "").split(",").forEach((id) => {
+          const value = id.trim();
+          if (value && ids.indexOf(value) === -1) ids.push(value);
+        });
+      });
+      let photoMap = {};
+      if (ids.length) {
+        try {
+          const photos = await this.request(`/api/v1/attachments/batch?ids=${ids.join(",")}`);
+          photoMap = (photos || []).reduce((acc, photo) => {
+            acc[photo.id] = photo;
+            return acc;
+          }, {});
+        } catch (error) {
+          photoMap = {};
+        }
+      }
+      this.logRows = (detail.logs || []).map((log) => {
+        const images = String(log.attachmentIds || "").split(",")
+          .map((id) => photoMap[id.trim()])
+          .filter((photo) => !!photo);
+        return {
+          ...log,
+          actionText: this.workOrderActionText(log.action),
+          fromText: log.fromStatus ? this.workOrderStatusText(log.fromStatus) : "—",
+          toText: this.workOrderStatusText(log.toStatus),
+          images
+        };
+      });
+    },
+    logPhotoUrls(log) {
+      return (log.images || []).map((photo) => this.mediaBase + photo.accessUrl);
+    },
+    async acceptance(result) {
+      if (result === "REJECT" && (!this.acceptanceRemark || this.acceptanceRemark.trim().length < 2)) {
+        this.acceptanceError = "退回时请填写验收意见";
+        return;
+      }
+      if (result === "PASS") {
+        try {
+          await ElMessageBox.confirm(
+            "验收通过后事件将自动关闭，且不可再退回。确认已现场复核并验收通过？",
+            "确认验收通过",
+            { type: "warning", confirmButtonText: "确认通过", cancelButtonText: "再检查一下" }
+          );
+        } catch (e) {
+          return;
+        }
+      }
+      this.acceptanceLoading = true;
+      this.acceptanceError = "";
+      try {
+        await this.request(`/api/v1/workorders/${this.currentWorkOrder.id}/acceptance`, {
+          method: "POST",
+          body: JSON.stringify({ result, remark: this.acceptanceRemark })
+        });
+        ElMessage.success(result === "PASS" ? "验收通过，事件将自动关闭" : "已退回处理");
+        this.workOrderVisible = false;
+        this.loadWorkOrders(this.workOrderQuery.page);
+        this.loadDashboard();
+      } catch (error) {
+        this.acceptanceError = error.message;
+      } finally {
+        this.acceptanceLoading = false;
+      }
+    },
+    async aiVerify() {
+      this.aiVerifyLoading = true;
+      try {
+        const result = await this.request(`/api/v1/workorders/${this.currentWorkOrder.id}/ai-verify`, {
+          method: "POST",
+          body: JSON.stringify({})
+        });
+        this.currentWorkOrder = { ...this.currentWorkOrder, aiVerify: result, aiVerifyTime: result.verifiedAt };
+        ElMessage.success(result.degraded ? `AI 核实已降级：${this.degradeText(result.degradeReason)}` : "AI 核实完成");
+      } catch (error) {
+        ElMessage.error(error.message);
+      } finally {
+        this.aiVerifyLoading = false;
+      }
+    },
+    async aiReviewEvent() {
+      if (!this.current) return;
+      this.aiReviewLoading = true;
+      try {
+        this.current = await this.request(`/api/v1/events/${this.current.id}/ai-review`, {
+          method: "POST",
+          body: JSON.stringify({})
+        });
+        ElMessage.success(this.current.aiReviewPriority
+          ? `AI 复评完成：${this.priorityText(this.current.aiReviewPriority)}`
+          : "AI 复评未返回有效结果");
+      } catch (error) {
+        ElMessage.error(error.message);
+      } finally {
+        this.aiReviewLoading = false;
+      }
+    },
+    applyAiPriority() {
+      if (!this.current || !this.current.aiReviewPriority) return;
+      this.auditForm.priority = this.current.aiReviewPriority;
+      ElMessage.success(`已采纳 AI 复评等级：${this.priorityText(this.current.aiReviewPriority)}`);
+    },
+    openReassignDialog() {
+      const currentId = this.currentWorkOrder ? String(this.currentWorkOrder.assigneeId) : "";
+      this.reassignCandidates = this.assignableWorkers.filter((worker) => String(worker.id) !== currentId);
+      this.reassignForm = {
+        assigneeId: this.reassignCandidates.length ? this.reassignCandidates[0].id : null,
+        reason: ""
+      };
+      this.reassignError = "";
+      this.reassignVisible = true;
+    },
+    async submitReassign() {
+      if (!this.reassignForm.assigneeId) {
+        this.reassignError = "请选择新的处理人";
+        return;
+      }
+      if (!this.reassignForm.reason || this.reassignForm.reason.trim().length < 5) {
+        this.reassignError = "改派原因不少于 5 个字";
+        return;
+      }
+      this.reassignLoading = true;
+      this.reassignError = "";
+      try {
+        await this.request(`/api/v1/workorders/${this.currentWorkOrder.id}/reassign`, {
+          method: "POST",
+          body: JSON.stringify(this.reassignForm)
+        });
+        ElMessage.success("改派成功");
+        this.reassignVisible = false;
+        this.currentWorkOrder = await this.request(`/api/v1/workorders/${this.currentWorkOrder.id}`);
+        this.loadWorkOrderLogs(this.currentWorkOrder);
+        this.loadWorkOrders(this.workOrderQuery.page);
+      } catch (error) {
+        this.reassignError = error.message;
+      } finally {
+        this.reassignLoading = false;
+      }
+    },
+
+    async loadUsers(page = 1) {
+      this.userQuery.page = page;
+      this.usersLoading = true;
+      try {
+        const query = new URLSearchParams({ page: this.userQuery.page, size: this.userQuery.size });
+        if (this.userQuery.role) query.set("role", this.userQuery.role);
+        if (this.userQuery.status) query.set("status", this.userQuery.status);
+        if (this.userQuery.keyword) query.set("keyword", this.userQuery.keyword);
+        const data = await this.request(`/api/v1/users?${query.toString()}`);
+        this.users = data.records || [];
+        this.userTotal = data.total || 0;
+      } catch (error) {
+        ElMessage.error(error.message);
+      } finally {
+        this.usersLoading = false;
+      }
+    },
+    async toggleUserStatus(row) {
+      const next = row.status === "ENABLED" ? "DISABLED" : "ENABLED";
+      try {
+        await ElMessageBox.confirm(
+          `确认将用户「${row.nickname}」${next === "ENABLED" ? "启用" : "禁用"}吗？`,
+          "账号状态变更",
+          { type: "warning", confirmButtonText: "确认", cancelButtonText: "取消" }
+        );
+      } catch (e) {
+        return;
+      }
+      try {
+        await this.request(`/api/v1/users/${row.id}/status`, {
+          method: "PATCH",
+          body: JSON.stringify({ status: next })
+        });
+        ElMessage.success("状态已更新");
+        this.loadUsers(this.userQuery.page);
+      } catch (error) {
+        ElMessage.error(error.message);
+      }
+    },
+    openRoleDialog(row) {
+      this.roleForm = {
+        userId: row.id,
+        username: row.username,
+        nickname: row.nickname,
+        roles: (row.roles || []).slice()
+      };
+      this.roleError = "";
+      this.roleDialogVisible = true;
+    },
+    async saveRoles() {
+      if (!this.roleForm.roles.length) {
+        this.roleError = "至少保留一个角色";
+        return;
+      }
+      this.roleLoading = true;
+      this.roleError = "";
+      try {
+        await this.request(`/api/v1/users/${this.roleForm.userId}/roles`, {
+          method: "PATCH",
+          body: JSON.stringify({ roles: this.roleForm.roles })
+        });
+        ElMessage.success("角色已更新");
+        this.roleDialogVisible = false;
+        this.loadUsers(this.userQuery.page);
+      } catch (error) {
+        this.roleError = error.message;
+      } finally {
+        this.roleLoading = false;
+      }
+    },
+    openResetDialog(row) {
+      this.resetForm = {
+        userId: row.id,
+        username: row.username || "微信用户",
+        nickname: row.nickname,
+        newPassword: ""
+      };
+      this.resetError = "";
+      this.resetDialogVisible = true;
+    },
+    async saveReset() {
+      const password = this.resetForm.newPassword || "";
+      if (password.length < 8 || password.length > 32) {
+        this.resetError = "密码长度需在 8-32 位之间";
+        return;
+      }
+      this.resetLoading = true;
+      this.resetError = "";
+      try {
+        await this.request(`/api/v1/users/${this.resetForm.userId}/reset-password`, {
+          method: "POST",
+          body: JSON.stringify({ newPassword: password })
+        });
+        ElMessage.success("密码已重置");
+        this.resetDialogVisible = false;
+      } catch (error) {
+        this.resetError = error.message;
+      } finally {
+        this.resetLoading = false;
+      }
+    },
+
+    openWorkerDialog(row) {
+      this.workerError = "";
+      if (row) {
+        this.workerForm = {
+          id: row.id,
+          username: row.username || "",
+          password: "",
+          nickname: row.nickname || "",
+          phone: "",
+          deptCode: row.deptCode || "ROAD",
+          areaCode: row.areaCode || "",
+          status: row.status || "ON_DUTY",
+          workerType: row.workerType || "MEMBER",
+          leaderId: row.leaderId || null,
+          workZone: row.workZone || "",
+          zoneLng: row.zoneLng == null ? "" : String(row.zoneLng),
+          zoneLat: row.zoneLat == null ? "" : String(row.zoneLat)
+        };
+      } else {
+        this.workerForm = { id: null, username: "", password: "", nickname: "", phone: "", deptCode: "ROAD", areaCode: "", status: "ON_DUTY", workerType: "MEMBER", leaderId: null, workZone: "", zoneLng: "", zoneLat: "" };
+      }
+      this.workerDialogVisible = true;
+    },
+    async saveWorker() {
+      const form = this.workerForm;
+      if (!form.nickname || !form.nickname.trim()) {
+        this.workerError = "请填写姓名";
+        return;
+      }
+      if (!form.id) {
+        if (!form.username || !form.username.trim()) {
+          this.workerError = "请填写登录账号";
+          return;
+        }
+        if (!form.password || form.password.length < 8 || form.password.length > 32) {
+          this.workerError = "初始密码长度需在 8-32 位之间";
+          return;
+        }
+      }
+      if (!form.deptCode) {
+        this.workerError = "请选择班组";
+        return;
+      }
+      if (form.workerType === "MEMBER" && !form.leaderId) {
+        this.workerError = "组员必须选择所属组长";
+        return;
+      }
+      this.workerLoading = true;
+      this.workerError = "";
+      const numeric = (value) => {
+        if (value === "" || value === null || value === undefined) return undefined;
+        const number = Number(value);
+        return Number.isFinite(number) ? number : undefined;
+      };
+      const common = {
+        nickname: form.nickname,
+        deptCode: form.deptCode,
+        areaCode: form.areaCode || undefined,
+        workerType: form.workerType,
+        leaderId: form.workerType === "MEMBER" ? form.leaderId : undefined,
+        workZone: form.workZone || undefined,
+        zoneLng: numeric(form.zoneLng),
+        zoneLat: numeric(form.zoneLat)
+      };
+      try {
+        if (form.id) {
+          await this.request(`/api/v1/workers/${form.id}`, {
+            method: "PUT",
+            body: JSON.stringify({ ...common, status: form.status })
+          });
+          ElMessage.success("工人信息已更新");
+        } else {
+          await this.request("/api/v1/workers", {
+            method: "POST",
+            body: JSON.stringify({
+              ...common,
+              username: form.username,
+              password: form.password,
+              phone: form.phone || undefined
+            })
+          });
+          ElMessage.success("工人创建成功");
+        }
+        this.workerDialogVisible = false;
+        this.loadWorkers();
+      } catch (error) {
+        this.workerError = error.message;
+      } finally {
+        this.workerLoading = false;
+      }
+    },
+
+    async loadRecruitments() {
+      this.recruitmentsLoading = true;
+      try {
+        this.recruitments = await this.request("/api/v1/recruitments") || [];
+      } catch (error) {
+        this.recruitments = [];
+        ElMessage.error(error.message);
+      } finally {
+        this.recruitmentsLoading = false;
+      }
+    },
+    openRecruitmentDialog(row) {
+      this.recruitmentError = "";
+      if (row) {
+        this.recruitmentForm = {
+          id: row.id,
+          title: row.title || "",
+          deptCode: row.deptCode || "ROAD",
+          workZone: row.workZone || "",
+          headcount: row.headcount || 1,
+          requirement: row.requirement || "",
+          description: row.description || "",
+          deadline: row.deadline || "",
+          coverUrl: row.coverUrl || ""
+        };
+      } else {
+        this.recruitmentForm = { id: null, title: "", deptCode: "ROAD", workZone: "", headcount: 1, requirement: "", description: "", deadline: "", coverUrl: "" };
+      }
+      this.recruitmentDialogVisible = true;
+    },
+    async saveRecruitment() {
+      const form = this.recruitmentForm;
+      if (!form.title || !form.title.trim()) {
+        this.recruitmentError = "请填写岗位名称";
+        return;
+      }
+      this.recruitmentLoading = true;
+      this.recruitmentError = "";
+      const payload = {
+        title: form.title.trim(),
+        deptCode: form.deptCode,
+        workZone: form.workZone || undefined,
+        headcount: form.headcount || 1,
+        requirement: form.requirement || undefined,
+        description: form.description || undefined,
+        deadline: form.deadline || null,
+        coverUrl: form.coverUrl || undefined
+      };
+      try {
+        if (form.id) {
+          await this.request(`/api/v1/recruitments/${form.id}`, {
+            method: "PUT",
+            body: JSON.stringify(payload)
+          });
+          ElMessage.success("招募岗位已更新");
+        } else {
+          await this.request("/api/v1/recruitments", {
+            method: "POST",
+            body: JSON.stringify(payload)
+          });
+          ElMessage.success("招募岗位已发布");
+        }
+        this.recruitmentDialogVisible = false;
+        this.loadRecruitments();
+      } catch (error) {
+        this.recruitmentError = error.message;
+      } finally {
+        this.recruitmentLoading = false;
+      }
+    },
+    async toggleRecruitmentStatus(row) {
+      const next = row.status === "OPEN" ? "CLOSED" : "OPEN";
+      try {
+        await ElMessageBox.confirm(
+          `确认${next === "OPEN" ? "重新上架" : "下架"}「${row.title}」吗？${next === "OPEN" ? "上架后会重新展示在居民端首页。" : "下架后居民端不再展示，已提交的报名保留。"}`,
+          "招募岗位状态变更",
+          { type: "warning", confirmButtonText: "确认", cancelButtonText: "取消" }
+        );
+      } catch (e) {
+        return;
+      }
+      try {
+        await this.request(`/api/v1/recruitments/${row.id}/status`, {
+          method: "PUT",
+          body: JSON.stringify({ status: next })
+        });
+        ElMessage.success(next === "OPEN" ? "已重新上架" : "已下架");
+        this.loadRecruitments();
+      } catch (error) {
+        ElMessage.error(error.message);
+      }
+    },
+    async openApplications(row) {
+      this.currentRecruitment = row;
+      this.applyDialogVisible = true;
+      this.applyLoading = true;
+      this.applyError = "";
+      try {
+        this.applyRows = await this.request(`/api/v1/recruitments/${row.id}/applications`) || [];
+      } catch (error) {
+        this.applyRows = [];
+        this.applyError = error.message;
+      } finally {
+        this.applyLoading = false;
+      }
+    },
+    async updateApplyStatus(row, status) {
+      try {
+        await this.request(`/api/v1/recruitments/applications/${row.applyId}/status`, {
+          method: "PUT",
+          body: JSON.stringify({ status })
+        });
+        ElMessage.success(status === "ACCEPTED" ? "已标记为录用" : "已标记为拒绝");
+        if (this.currentRecruitment) {
+          await this.openApplications(this.currentRecruitment);
+        }
+      } catch (error) {
+        this.applyError = error.message;
+      }
+    },
+    applyStatusText(status) {
+      const map = { PENDING: "待处理", ACCEPTED: "已录用", REJECTED: "已拒绝" };
+      return map[status] || status || "-";
+    },
+    applyStatusTagType(status) {
+      if (status === "ACCEPTED") return "success";
+      if (status === "REJECTED") return "danger";
+      return "warning";
+    },
+
+    statusText(status) {
+      const item = STATUS_OPTIONS.find((option) => option.value === status);
+      return item ? item.label : (status || "-");
+    },
+    statusColor(status) {
+      return STATUS_COLOR[status] || "#64748b";
+    },
+    statusTagType(status) {
+      if (status === "CLOSED") return "success";
+      if (status === "REJECTED") return "danger";
+      if (status === "PENDING_REVIEW") return "warning";
+      if (status === "CANCELLED") return "info";
+      return "primary";
+    },
+    workOrderStatusText(status) {
+      const item = WORKORDER_STATUS_OPTIONS.find((option) => option.value === status);
+      return item ? item.label : (status || "-");
+    },
+    workOrderTagType(status) {
+      if (status === "COMPLETED") return "success";
+      if (status === "PENDING_ACCEPTANCE" || status === "PENDING_LEADER_REVIEW") return "warning";
+      if (status === "PROCESSING") return "primary";
+      return "info";
+    },
+    conclusionText(value) {
+      const map = {
+        RECTIFIED: "已整改",
+        PARTIALLY_RECTIFIED: "部分整改",
+        NOT_RECTIFIED: "未整改",
+        UNCERTAIN: "无法判断"
+      };
+      return map[value] || value || "-";
+    },
+    degradeText(value) {
+      const map = {
+        NO_IMAGE: "无现场照片，AI 无法核实",
+        IMAGE_UNREADABLE: "现场照片无法读取，AI 无法核实",
+        LLM_RATE_LIMITED: "AI 服务繁忙（限流）",
+        QUOTA_EXCEEDED: "AI 服务额度不足",
+        TIMEOUT: "AI 服务超时",
+        CIRCUIT_OPEN: "AI 服务熔断中",
+        RATE_LIMITED: "AI 调用过于频繁",
+        PARSE_FAILED: "AI 返回结果无法解析",
+        EMPTY_RESPONSE: "AI 未返回内容",
+        LLM_ERROR: "AI 调用失败"
+      };
+      return map[value] || value || "未知原因";
+    },
+
+    async loadTMapSdk() {
+      if (window.TMap) return;
+      const config = await this.request("/api/v1/map/config");
+      if (!config.jsApiKey) {
+        throw new Error("未配置腾讯地图 JSAPI Key（TENCENT_MAP_JS_KEY）");
+      }
+      await new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = `https://map.qq.com/api/gljs?v=1.exp&key=${encodeURIComponent(config.jsApiKey)}`;
+        script.onload = resolve;
+        script.onerror = () => reject(new Error("腾讯地图 JSAPI 加载失败，请检查网络"));
+        document.head.appendChild(script);
+      });
+      for (let i = 0; i < 50 && !window.TMap; i++) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+      if (!window.TMap) {
+        throw new Error("腾讯地图 JSAPI 初始化超时");
+      }
+    },
+    async initMap() {
+      await this.loadTMapSdk();
+      this.map = markRaw(new TMap.Map("map", {
+        center: new TMap.LatLng(39.9165, 116.3971),
+        zoom: 12,
+        viewMode: "2D"
+      }));
+      this.markerLayer = markRaw(new TMap.MultiMarker({
+        map: this.map,
+        styles: {
+          DEFAULT: new TMap.MarkerStyle({ width: 12, height: 12, anchor: { x: 6, y: 6 }, src: markerIcon("#64748b", 12, 0) })
+        },
+        geometries: []
+      }));
+      this.locationMarker = markRaw(new TMap.MultiMarker({
+        map: this.map,
+        styles: {
+          CURRENT: new TMap.MarkerStyle({
+            width: 26,
+            height: 26,
+            anchor: { x: 13, y: 13 },
+            src: LOCATION_ICON
+          })
+        },
+        geometries: []
+      }));
+      this.infoWindow = markRaw(new TMap.InfoWindow({
+        map: this.map,
+        position: new TMap.LatLng(39.9165, 116.3971),
+        content: "",
+        offset: { x: 0, y: -16 }
+      }));
+      this.infoWindow.close();
+      this.markerLayer.on("click", (evt) => {
+        const id = evt.geometry && evt.geometry.id;
+        const model = markerModels[id];
+        if (!model) return;
+        this.infoWindow.setPosition(new TMap.LatLng(model.lat, model.lng));
+        this.infoWindow.setContent(this.markerInfoContent(model));
+        this.infoWindow.open();
+      });
+      // 地图平移/缩放结束后按当前缩放级别重新计算图标尺寸与聚合
+      this.map.on("idle", () => this.renderMapMarkers());
+    },
+    async loadMapPoints() {
+      try {
+        if (!this.map) {
+          await this.initMap();
+        }
+        const query = new URLSearchParams();
+        if (this.mapFilter.status) query.set("status", this.mapFilter.status);
+        if (this.mapFilter.categoryCode) query.set("categoryCode", this.mapFilter.categoryCode);
+        const points = await this.request(`/api/v1/events/map-points?${query.toString()}`);
+        this.mapPoints = points || [];
+        if (this.mapPoints.length) {
+          this.map.setCenter(new TMap.LatLng(Number(this.mapPoints[0].latitude), Number(this.mapPoints[0].longitude)));
+          this.map.setZoom(13);
+        }
+        this.renderMapMarkers();
+        ElMessage.success(`已加载 ${this.mapPoints.length} 个事件点位`);
+      } catch (error) {
+        ElMessage.error(error.message);
+      }
+    },
+    renderMapMarkers() {
+      if (!this.map || !this.markerLayer) return;
+      Object.keys(markerModels).forEach((key) => delete markerModels[key]);
+      const points = (this.mapPoints || []).filter((point) => (
+        Number.isFinite(Number(point.longitude)) && Number.isFinite(Number(point.latitude))
+      ));
+      if (!points.length) {
+        this.markerLayer.setGeometries([]);
+        return;
+      }
+      const zoom = Number(this.map.getZoom()) || 12;
+      const size = markerSizeForZoom(zoom);
+      // 以当前缩放级别的世界像素坐标为网格做聚合，保证聚合范围与屏幕视觉一致
+      const worldSize = 256 * Math.pow(2, zoom);
+      const cells = new Map();
+      points.forEach((point) => {
+        const lng = Number(point.longitude);
+        const lat = Number(point.latitude);
+        const sin = Math.sin((lat * Math.PI) / 180);
+        const x = ((lng + 180) / 360) * worldSize;
+        const y = (0.5 - Math.log((1 + sin) / (1 - sin)) / (4 * Math.PI)) * worldSize;
+        const key = `${Math.floor(x / MARKER_CLUSTER_GRID)}:${Math.floor(y / MARKER_CLUSTER_GRID)}`;
+        if (!cells.has(key)) {
+          cells.set(key, { points: [], latSum: 0, lngSum: 0, statusCount: {} });
+        }
+        const cell = cells.get(key);
+        cell.points.push(point);
+        cell.latSum += lat;
+        cell.lngSum += lng;
+        cell.statusCount[point.status] = (cell.statusCount[point.status] || 0) + 1;
+      });
+      const styles = {
+        DEFAULT: new TMap.MarkerStyle({ width: 12, height: 12, anchor: { x: 6, y: 6 }, src: markerIcon("#64748b", 12, 0) })
+      };
+      const geometries = [];
+      let clusterSeq = 0;
+      cells.forEach((cell) => {
+        const count = cell.points.length;
+        const lat = cell.latSum / count;
+        const lng = cell.lngSum / count;
+        if (count === 1) {
+          const point = cell.points[0];
+          const color = STATUS_COLOR[point.status] || "#64748b";
+          const styleId = `POINT_${point.status}_${size}`;
+          if (!styles[styleId]) {
+            styles[styleId] = new TMap.MarkerStyle({ width: size, height: size, anchor: { x: size / 2, y: size / 2 }, src: markerIcon(color, size, 0) });
+          }
+          const id = `p:${point.id}`;
+          markerModels[id] = { type: "single", point, lat, lng };
+          geometries.push({ id, styleId, position: new TMap.LatLng(lat, lng) });
+          return;
+        }
+        // 聚合点取数量最多的状态作为主色，图标上显示事件数量
+        const status = Object.keys(cell.statusCount).sort((a, b) => cell.statusCount[b] - cell.statusCount[a])[0];
+        const color = STATUS_COLOR[status] || "#64748b";
+        const clusterSize = Math.min(52, size + 8 + Math.round(Math.log2(count) * 4));
+        const styleId = `CLUSTER_${status}_${clusterSize}_${count}`;
+        if (!styles[styleId]) {
+          styles[styleId] = new TMap.MarkerStyle({ width: clusterSize, height: clusterSize, anchor: { x: clusterSize / 2, y: clusterSize / 2 }, src: markerIcon(color, clusterSize, count) });
+        }
+        const id = `c:${clusterSeq++}`;
+        markerModels[id] = { type: "cluster", points: cell.points, lat, lng, count };
+        geometries.push({ id, styleId, position: new TMap.LatLng(lat, lng) });
+      });
+      this.markerLayer.setGeometries([]);
+      this.markerLayer.setStyles(styles);
+      this.markerLayer.setGeometries(geometries);
+    },
+    markerInfoContent(model) {
+      if (model.type === "cluster") {
+        const shown = model.points.slice(0, 20);
+        const rest = model.count - shown.length;
+        return (
+          `<div style="font-size:13px"><b>该区域共 ${model.count} 个事件</b></div>` +
+          `<div style="margin-top:6px;max-height:200px;overflow-y:auto;font-size:12px;line-height:1.8">` +
+          shown.map((point) => (
+            `<div><span style="color:${STATUS_COLOR[point.status] || "#64748b"}">●</span> ` +
+            `${escapeHtml(point.eventNo)} ｜ ${escapeHtml(this.statusText(point.status))} ｜ ${escapeHtml(this.priorityText(point.priority))}</div>`
+          )).join("") +
+          (rest > 0 ? `<div style="color:#9ca3af">… 另有 ${rest} 个事件，放大地图查看</div>` : "") +
+          `</div>`
+        );
+      }
+      const point = model.point;
+      return (
+        `<div style="font-size:13px"><b>${escapeHtml(point.eventNo)}</b></div>` +
+        `<div>${escapeHtml(this.statusText(point.status))}｜${escapeHtml(this.priorityText(point.priority))}</div>` +
+        `<div style="color:#6b7280">${escapeHtml(point.address || "")}</div>`
+      );
+    },
+    locateMe(silent = false) {
+      if (!this.map) {
+        if (!silent) ElMessage.warning("请先打开地图分布页");
+        return;
+      }
+      if (!navigator.geolocation) {
+        if (!silent) ElMessage.warning("当前浏览器不支持定位");
+        return;
+      }
+      this.locating = true;
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          this.locating = false;
+          const gcj = this.wgs84ToGcj02(Number(position.coords.longitude), Number(position.coords.latitude));
+          const latLng = new TMap.LatLng(gcj.lat, gcj.lng);
+          const accuracy = Math.round(Number(position.coords.accuracy) || 0);
+          this.locationMarker.setGeometries([{ id: "current", styleId: "CURRENT", position: latLng }]);
+          this.map.setCenter(latLng);
+          this.map.setZoom(15);
+          if (!silent) {
+            this.infoWindow.setPosition(latLng);
+            this.infoWindow.setContent(
+              `<b>我的位置</b><br/>${gcj.lng.toFixed(6)}, ${gcj.lat.toFixed(6)}<br/>精度约 ${accuracy} 米`
+            );
+            this.infoWindow.open();
+            ElMessage.success("已定位到当前位置");
+          }
+        },
+        (error) => {
+          this.locating = false;
+          if (!silent) {
+            const messages = {
+              1: "定位权限被拒绝，请在浏览器地址栏允许定位后重试",
+              2: "定位服务不可用，请检查系统定位设置",
+              3: "定位超时，请重试"
+            };
+            ElMessage.warning(messages[error.code] || "定位失败");
+          }
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
+      );
+    },
+    wgs84ToGcj02(lng, lat) {
+      // 浏览器定位返回 WGS84，腾讯底图使用 GCJ-02，需要转换
+      if (lng < 72.004 || lng > 137.8347 || lat < 0.8293 || lat > 55.8271) {
+        return { lng, lat };
+      }
+      const a = 6378245.0;
+      const ee = 0.00669342162296594323;
+      const transformLat = (x, y) => {
+        let ret = -100.0 + 2.0 * x + 3.0 * y + 0.2 * y * y + 0.1 * x * y + 0.2 * Math.sqrt(Math.abs(x));
+        ret += (20.0 * Math.sin(6.0 * x * Math.PI) + 20.0 * Math.sin(2.0 * x * Math.PI)) * 2.0 / 3.0;
+        ret += (20.0 * Math.sin(y * Math.PI) + 40.0 * Math.sin(y / 3.0 * Math.PI)) * 2.0 / 3.0;
+        ret += (160.0 * Math.sin(y / 12.0 * Math.PI) + 320 * Math.sin(y * Math.PI / 30.0)) * 2.0 / 3.0;
+        return ret;
+      };
+      const transformLng = (x, y) => {
+        let ret = 300.0 + x + 2.0 * y + 0.1 * x * x + 0.1 * x * y + 0.1 * Math.sqrt(Math.abs(x));
+        ret += (20.0 * Math.sin(6.0 * x * Math.PI) + 20.0 * Math.sin(2.0 * x * Math.PI)) * 2.0 / 3.0;
+        ret += (20.0 * Math.sin(x * Math.PI) + 40.0 * Math.sin(x / 3.0 * Math.PI)) * 2.0 / 3.0;
+        ret += (150.0 * Math.sin(x / 12.0 * Math.PI) + 300.0 * Math.sin(x / 30.0 * Math.PI)) * 2.0 / 3.0;
+        return ret;
+      };
+      let dLat = transformLat(lng - 105.0, lat - 35.0);
+      let dLng = transformLng(lng - 105.0, lat - 35.0);
+      const radLat = lat / 180.0 * Math.PI;
+      let magic = Math.sin(radLat);
+      magic = 1 - ee * magic * magic;
+      const sqrtMagic = Math.sqrt(magic);
+      dLat = (dLat * 180.0) / ((a * (1 - ee)) / (magic * sqrtMagic) * Math.PI);
+      dLng = (dLng * 180.0) / (a / sqrtMagic * Math.cos(radLat) * Math.PI);
+      return { lng: lng + dLng, lat: lat + dLat };
+    }
+  }
+}).use(ElementPlus).mount("#app");
+</script>
+</body>
+</html>

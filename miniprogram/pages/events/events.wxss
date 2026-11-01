@@ -1,0 +1,97 @@
+.page {
+  padding-bottom: calc(140rpx + env(safe-area-inset-bottom));
+}
+
+.filter-bar {
+  white-space: nowrap;
+  margin-bottom: 20rpx;
+}
+
+.filter-item {
+  display: inline-block;
+  padding: 10rpx 26rpx;
+  margin-right: 14rpx;
+  border-radius: 999rpx;
+  font-size: 26rpx;
+  color: #6b7280;
+  background: #ffffff;
+  border: 1rpx solid #e5e7eb;
+}
+
+.filter-item.active {
+  color: #1f6feb;
+  background: #eef4ff;
+  border-color: #1f6feb;
+  font-weight: 600;
+}
+
+/* 招募轮播 */
+.recruit-swiper {
+  height: 260rpx;
+  margin-bottom: 20rpx;
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+.recruit-card {
+  position: relative;
+  height: 260rpx;
+  border-radius: 16rpx;
+  overflow: hidden;
+  background: linear-gradient(135deg, #1f6feb 0%, #4f9bff 100%);
+}
+
+.recruit-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 260rpx;
+}
+
+.recruit-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 260rpx;
+  background: linear-gradient(90deg, rgba(15, 23, 42, 0.72) 0%, rgba(15, 23, 42, 0.18) 100%);
+}
+
+.recruit-content {
+  position: relative;
+  z-index: 2;
+  padding: 30rpx 32rpx;
+  color: #ffffff;
+}
+
+.recruit-badge {
+  display: inline-block;
+  padding: 4rpx 14rpx;
+  font-size: 20rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.recruit-title {
+  margin-top: 14rpx;
+  font-size: 34rpx;
+  font-weight: 600;
+}
+
+.recruit-sub {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  opacity: 0.9;
+}
+
+.recruit-btn {
+  display: inline-block;
+  margin-top: 18rpx;
+  padding: 8rpx 22rpx;
+  font-size: 24rpx;
+  border-radius: 999rpx;
+  background: #ffffff;
+  color: #1f6feb;
+  font-weight: 600;
+}

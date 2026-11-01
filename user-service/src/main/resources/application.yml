@@ -1,0 +1,129 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: user-service
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  config:
+    import:
+      - optional:nacos:city-common.yaml?group=CITY_PLATFORM&refreshEnabled=true
+      - optional:nacos:user-service.yaml?group=CITY_PLATFORM&refreshEnabled=true
+  cloud:
+    nacos:
+      server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
+      discovery:
+        enabled: ${NACOS_DISCOVERY_ENABLED:true}
+        group: CITY_PLATFORM
+        namespace: ${NACOS_NAMESPACE:public}
+        metadata:
+          version: 1.0.0
+      config:
+        enabled: ${NACOS_CONFIG_ENABLED:true}
+        group: CITY_PLATFORM
+        namespace: ${NACOS_NAMESPACE:public}
+        file-extension: yaml
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${MYSQL_HOST:127.0.0.1}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:city_user}?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true
+    username: ${MYSQL_USERNAME:root}
+    password: ${MYSQL_PASSWORD:}
+    druid:
+      initial-size: ${DRUID_INITIAL_SIZE:2}
+      min-idle: 2
+      max-active: 20
+      max-wait: 5000
+      validation-query: SELECT 1
+      test-while-idle: true
+      test-on-borrow: false
+      async-init: ${DRUID_ASYNC_INIT:false}
+      fail-fast: false
+      stat-view-servlet:
+        enabled: ${DRUID_STAT_ENABLED:false}
+        url-pattern: /druid/*
+        login-username: ${DRUID_STAT_USERNAME:admin}
+        login-password: ${DRUID_STAT_PASSWORD:}
+      filter:
+        stat:
+          enabled: true
+          log-slow-sql: true
+          slow-sql-millis: 1000
+  data:
+    redis:
+      host: ${REDIS_HOST:127.0.0.1}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: 0
+      timeout: 3s
+      lettuce:
+        pool:
+          max-active: 16
+          max-idle: 8
+          min-idle: 2
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+    default-property-inclusion: non_null
+  mail:
+    host: ${MAIL_HOST:smtp.qq.com}
+    port: ${MAIL_PORT:465}
+    username: ${MAIL_USER:}
+    password: ${MAIL_PASS:}
+    default-encoding: UTF-8
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.ssl.enable: ${MAIL_SSL:true}
+      mail.smtp.connectiontimeout: 10000
+      mail.smtp.timeout: 10000
+      mail.smtp.writetimeout: 10000
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+  global-config:
+    banner: false
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+sa-token:
+  token-name: Authorization
+  token-prefix: Bearer
+  timeout: 7200
+  active-timeout: -1
+  is-concurrent: true
+  is-share: false
+  token-style: uuid
+  is-log: false
+
+city:
+  security:
+    internal-token: ${INTERNAL_TOKEN:}
+  wechat:
+    app-id: ${WECHAT_APP_ID:wx6e2a9f37005ab6aa}
+    app-secret: ${WECHAT_APP_SECRET:}
+    mock-enabled: ${WECHAT_MOCK_ENABLED:false}
+    timeout-seconds: 5
+  mail:
+    from: ${MAIL_FROM:}
+    # SMTP 未配置时是否把验证码打印到日志（本地联调用；生产配置 false）
+    log-code: ${MAIL_LOG_CODE:true}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,loggers,env,threaddump,heapdump,httptrace,caches,scheduledtasks
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.city.platform: info
+    com.alibaba.nacos: warn

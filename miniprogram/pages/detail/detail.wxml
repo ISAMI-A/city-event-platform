@@ -1,0 +1,87 @@
+<view class="page">
+  <view class="empty" wx:if="{{loading}}">加载中…</view>
+  <view class="error" wx:if="{{error}}">{{error}}</view>
+
+  <block wx:if="{{detail}}">
+    <view class="card">
+      <view class="row">
+        <view class="title" style="margin:0;">{{detail.title}}</view>
+        <view class="tag">{{detail.statusText}}</view>
+      </view>
+      <view class="label" style="margin-top:10rpx;">{{detail.eventNo}}｜{{detail.createTime}}</view>
+      <view class="timeline-text" style="margin-top:10rpx;">{{detail.description}}</view>
+      <view class="timeline-text" style="margin-top:10rpx;">位置：{{detail.address}}</view>
+      <view class="error" wx:if="{{detail.rejectReason}}">驳回原因：{{detail.rejectReason}}</view>
+    </view>
+
+    <view class="card" wx:if="{{detail.status === 'PENDING_REVIEW'}}">
+      <button class="btn btn-secondary" loading="{{cancelling}}" disabled="{{cancelling}}" bindtap="cancelEvent">撤销上报</button>
+    </view>
+
+    <view class="card" wx:if="{{detail.status === 'REJECTED'}}">
+      <button class="btn" bindtap="resubmit">修改并重新提交</button>
+    </view>
+
+    <view class="card" wx:if="{{detail.aiSnapshot}}">
+      <view class="title" style="font-size:28rpx;">AI 建议快照</view>
+      <view class="timeline-text">类别：{{detail.aiSnapshot.categoryCode}}｜优先级：{{detail.aiSnapshot.priority}}</view>
+      <view class="timeline-text" wx:if="{{detail.aiSnapshot.summary}}">摘要：{{detail.aiSnapshot.summary}}</view>
+      <view class="timeline-text" wx:if="{{detail.aiSnapshot.suggestion}}">建议：{{detail.aiSnapshot.suggestion}}</view>
+      <view class="timeline-text">置信度：{{detail.aiSnapshot.confidence}}</view>
+    </view>
+
+    <view class="card" wx:if="{{detail.aiReviewPriority}}">
+      <view class="title" style="font-size:28rpx;">AI 紧急程度复评</view>
+      <view class="timeline-text">复评等级：{{detail.aiReviewPriority}}{{detail.aiReviewResponseMinutes ? '｜建议响应 ' + detail.aiReviewResponseMinutes + ' 分钟' : ''}}</view>
+      <view class="timeline-text" wx:if="{{detail.aiReviewImpact}}">影响范围：{{detail.aiReviewImpact}}</view>
+      <view class="timeline-text" wx:if="{{detail.aiReviewReason}}">判断依据：{{detail.aiReviewReason}}</view>
+      <view class="timeline-text">管理员审核时会参考该结果，最终等级以管理员审核为准</view>
+    </view>
+
+    <view class="card">
+      <view class="title" style="font-size:28rpx;">现场照片</view>
+      <view style="display:flex;flex-wrap:wrap;">
+        <image wx:for="{{detail.attachments}}" wx:key="id" class="thumb" src="{{item.accessUrl}}" mode="aspectFill" />
+      </view>
+      <view class="empty" wx:if="{{detail.attachments.length === 0}}">暂无照片</view>
+    </view>
+
+    <view class="card">
+      <view class="title" style="font-size:28rpx;">处理进度</view>
+      <view class="timeline-item" wx:for="{{detail.timeline}}" wx:key="index">
+        <view class="timeline-text">{{item.action}}：{{item.fromStatusText}} → {{item.toStatusText}}</view>
+        <view class="timeline-time">{{item.createTime}}{{item.remark ? '｜' + item.remark : ''}}</view>
+      </view>
+    </view>
+
+    <view class="card" wx:if="{{detail.workOrder}}">
+      <view class="title" style="font-size:28rpx;">关联工单</view>
+      <view class="timeline-text">{{detail.workOrder.workOrderNo}}｜{{detail.workOrder.statusText}}</view>
+    </view>
+
+    <!-- 工单完成后评价处理人，评分计入组长绩效 -->
+    <view class="card" wx:if="{{detail.workOrder && detail.workOrder.status === 'COMPLETED'}}">
+      <view class="title" style="font-size:28rpx;">服务评价</view>
+      <block wx:if="{{rating}}">
+        <view class="rating-stars">
+          <text wx:for="{{starList}}" wx:key="*this" class="star {{item <= rating.rating ? 'active' : ''}}">★</text>
+        </view>
+        <view class="timeline-text" wx:if="{{rating.tags}}">标签：{{rating.tags}}</view>
+        <view class="timeline-text" wx:if="{{rating.comment}}">{{rating.comment}}</view>
+        <view class="timeline-text">已评价，感谢你的反馈</view>
+      </block>
+      <block wx:else>
+        <view class="timeline-text">本次工单已处理完成，欢迎对处理人员打分</view>
+        <view class="rating-stars">
+          <text wx:for="{{starList}}" wx:key="*this" class="star {{item <= ratingValue ? 'active' : ''}}" data-value="{{item}}" bindtap="selectStar">★</text>
+        </view>
+        <view class="tag-chips">
+          <view wx:for="{{tagOptions}}" wx:key="name" class="tag-chip {{item.active ? 'active' : ''}}" data-index="{{index}}" bindtap="toggleTag">{{item.name}}</view>
+        </view>
+        <textarea class="textarea" maxlength="200" placeholder="选填，说说本次处理体验" value="{{ratingComment}}" bindinput="onRatingCommentInput"></textarea>
+        <button class="btn" style="margin-top:16rpx;" loading="{{ratingSubmitting}}" disabled="{{ratingSubmitting}}" bindtap="submitRating">提交评价</button>
+        <view class="muted-tip">评价提交后不可修改，将计入处理人员的绩效</view>
+      </block>
+    </view>
+  </block>
+</view>

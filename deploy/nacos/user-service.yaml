@@ -1,0 +1,17 @@
+# Nacos 服务私有配置示例（Data ID: user-service.yaml，Group: CITY_PLATFORM，格式: YAML）
+# 其他服务按相同结构创建 {service-name}.yaml。
+# 敏感项（数据库密码、内部 Token、模型 Key）必须使用 ${ENV} 占位并由环境变量提供。
+
+logging:
+  level:
+    com.city.platform.user: info
+
+city:
+  security:
+    internal-token: ${INTERNAL_TOKEN:}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,loggers

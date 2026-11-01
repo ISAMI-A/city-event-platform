@@ -1,0 +1,12 @@
+<view class="tab-bar">
+  <view
+    class="tab-item {{selected === index ? 'active' : ''}}"
+    wx:for="{{tabs}}"
+    wx:key="pagePath"
+    data-index="{{index}}"
+    bindtap="onTap"
+  >
+    <view class="tab-indicator"></view>
+    <view class="tab-text">{{item.text}}</view>
+  </view>
+</view>

@@ -1,0 +1,41 @@
+server:
+  port: 7091
+
+spring:
+  application:
+    name: seata-server
+
+logging:
+  config: classpath:logback-spring.xml
+  file:
+    path: ${log.home:/seata-server/logs}
+
+console:
+  user:
+    username: seata
+    password: seata
+
+seata:
+  config:
+    type: file
+  registry:
+    type: nacos
+    nacos:
+      application: seata-server
+      server-addr: ${NACOS_SERVER_ADDR:nacos:8848}
+      group: SEATA_GROUP
+      namespace: public
+      cluster: default
+  store:
+    mode: file
+    file:
+      dir: /seata-server/sessionStore
+  server:
+    service-port: 8091
+    max-commit-retry-timeout: 120000
+    max-rollback-retry-timeout: 120000
+  security:
+    secretKey: SeataSecretKey0c382ef121d778043159209298fd40bf3850a017
+    tokenValidityInMilliseconds: 1800000
+    ignore:
+      urls: /,/**/*.css,/**/*.js,/**/*.html,/**/*.map,/**/*.svg,/**/*.png,/**/*.jpeg,/**/*.ico,/api/v1/auth/login,/version.json,/health,/error

@@ -1,0 +1,10 @@
+# 本机开发：依赖本机 Nacos、MySQL(city_user)、Redis
+spring:
+  cloud:
+    nacos:
+      server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
+
+logging:
+  level:
+    com.city.platform.user: debug
+    com.city.platform.user.mapper: debug

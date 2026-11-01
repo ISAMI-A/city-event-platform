@@ -1,0 +1,8 @@
+spring:
+  cloud:
+    nacos:
+      server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
+
+logging:
+  level:
+    com.city.platform.map: debug

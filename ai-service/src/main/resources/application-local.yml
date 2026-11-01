@@ -1,0 +1,16 @@
+# 本机最小启动模式：关闭 Nacos，数据库允许暂不可用（仅验证上下文）
+spring:
+  cloud:
+    nacos:
+      discovery:
+        enabled: false
+      config:
+        enabled: false
+  datasource:
+    druid:
+      initial-size: 0
+      async-init: true
+
+logging:
+  level:
+    com.city.platform.ai: debug

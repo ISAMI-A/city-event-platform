@@ -1,0 +1,9 @@
+# 本机开发：依赖本机 Nacos（127.0.0.1:8848）、Redis（127.0.0.1:6379）
+spring:
+  cloud:
+    nacos:
+      server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
+
+logging:
+  level:
+    com.city.platform.gateway: debug

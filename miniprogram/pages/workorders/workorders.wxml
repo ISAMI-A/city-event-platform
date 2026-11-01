@@ -1,0 +1,46 @@
+<view class="page">
+  <view class="row" style="margin-bottom:20rpx;">
+    <view class="title" style="margin:0;">{{isLeader ? '组内工单' : '我的工单'}}</view>
+    <view class="head-actions">
+      <view class="bell" bindtap="goNotifications">
+        <image class="bell-icon" src="/assets/bell.png" mode="aspectFit" />
+        <view class="bell-badge" wx:if="{{unread > 0}}">{{unread}}</view>
+      </view>
+      <button class="btn btn-secondary" wx:if="{{isLeader}}" style="width:150rpx;margin:0;padding:10rpx 0;font-size:26rpx;" bindtap="goTeam">团队</button>
+    </view>
+  </view>
+
+  <view class="todo-card" wx:if="{{todoCount > 0}}" bindtap="onFilter" data-key="TODO">
+    <view class="todo-left">
+      <view class="todo-num">{{todoCount}}</view>
+      <view class="todo-label">待我处理</view>
+    </view>
+    <view class="todo-desc">{{isLeader ? '含待分配与待复核工单，点击筛选' : '含待接单与处理中工单，点击筛选'}}</view>
+  </view>
+
+  <scroll-view class="filter-bar" scroll-x="true">
+    <view
+      class="filter-item {{filterKey === item.key ? 'active' : ''}}"
+      wx:for="{{filters}}"
+      wx:key="key"
+      data-key="{{item.key}}"
+      bindtap="onFilter"
+    >{{item.name}}</view>
+  </scroll-view>
+
+  <view class="error" wx:if="{{error}}">{{error}}</view>
+  <view class="empty" wx:if="{{loading}}">加载中…</view>
+  <view class="empty" wx:elif="{{viewList.length === 0}}">暂无对应状态的工单</view>
+
+  <view class="card" wx:for="{{viewList}}" wx:key="id" data-id="{{item.id}}" bindtap="goDetail">
+    <view class="row">
+      <view class="title" style="font-size:28rpx;margin:0;">
+        <view class="todo-dot" wx:if="{{item.isTodo}}"></view>{{item.workOrderNo}}
+      </view>
+      <view class="tag {{item.statusClass}}">{{item.statusText}}</view>
+    </view>
+    <view class="timeline-text" style="margin-top:8rpx;">事件：{{item.eventNo}}｜{{item.categoryCode}}｜{{item.priority}}</view>
+    <view class="timeline-text" wx:if="{{isLeader}}">处理人：{{item.assigneeName || '-'}}</view>
+    <view class="label" style="margin-top:6rpx;">派单时间：{{item.assignTime}}</view>
+  </view>
+</view>
